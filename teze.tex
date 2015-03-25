@@ -201,24 +201,14 @@ significantly higher correlation with human judgment than Meteor on the WMT12 an
 %exact match on~these new reference sentences.
 
 \section{Data}
-
-
-
-In \newcite{barancikova:2014}, we experiment with several methods of paraphrasing of Czech sentences and
-filtering the Czech Meteor tables. We show that the amount of noise in the multi-word paraphrases is very high
-and no automatic filtering method we used outperforms omitting them completely. We present an error analysis 
-based method of filtering paraphrases consisting of pairs of single words, which is used in subsection 
-\ref{zdroje_parafrazi}. From several methods of paraphrasing, we achieved the best results a with simple greedy 
-method, which is presented in section \ref{creating_new_references}.
-
-\section{Data}
-We perform our experiments on data sets from the English-to-Czech translation task 
-of WMT12 \cite{wmt12}, WMT13 \cite{wmt13} and WMT14 \cite{wmt14}. The 
-data sets contain 13/14\footnote{We use only 12 of them because two of them (FDA.2878 
+We perform our experiments on data sets from the English-to-Czech translation 
+task of WMT12 \cite{wmt12}, WMT13 \cite{wmt13} and WMT14 \cite{wmt14}. The data 
+sets contain 13/14\footnote{We use only 12 of them because two of them (FDA.2878 
 and online-G) have no human judgments.}/10 files with Czech outputs of MT systems.
-In addition, each data set contains one file with corresponding reference sentences and one with original 
-English source sentences. We perform morphological analysis and tagging 
-of the hypotheses and the reference sentences using Morče \cite{morce:2007}.
+
+In addition, each data set contains one file with corresponding reference sentences 
+and one with original English source sentences. We perform morphological analysis 
+and tagging of the hypotheses and the reference sentences using Morče \cite{morce:2007}.
 
 The human judgment of hypotheses is available as a relative ranking of performance of 
 five systems for~a~sentence. We calculated the score for every system by the “$ > $ others” 
@@ -228,31 +218,52 @@ as $ \frac{wins}{wins+loses} $. We refer to this interpretation of human judgmen
 computed differently each year (here referred to as \textit{gold standard}).
 
 \subsection{Sources of Paraphrases}
-\label{zdroje_parafrazi}
-We use two available sources of Czech paraphrases -- the Czech WordNet 1.9 PDT 
-\cite{czech-wordnet} and the Meteor Paraphrase Tables \cite{meteor-tables}. 
+We make use of all existing sources of Czech paraphrases -- the Czech WordNet 1.9 PDT 
+\cite{czech-wordnet}, the Meteor Paraphrase Tables \cite{meteor-tables} and Czech PPDB %TODO: cite 
+, which recently became available.
 
-\begin{table}[tb]
-\begin{center}
-\scalebox{0.97}{
-\begin{tabular}{l|ccc}
-& WMT12 & WMT13 & WMT14\\
-\hline
-WordNet            & 0.26 & 0.22 & 0.24\\
-filtered Meteor    & 1.53 & 1.29 & 1.39\\
-together           & 1.59 & 1.34 & 1.44\\
-\end{tabular}}
-\caption{Average number of one-word paraphrases per sentence found in WordNet, 
-filtered Meteor tables and their union over all systems.}
-\label{number_of_substitutions}
-\end{center}
-\end{table}
+The Czech WordNet 1.9 PDT is derived from the WordNet \cite{wordnet} by automatic translation 
+followed by manual verification. It~contains rather high quality lemmatized paraphrases. However 
+their amount is~insufficient for our purposes %(see\Tref{number_of_substitutions}).  
+%It contains 13k pairs of synonymous lemmas and 
+- only one paraphrase per four sentences on~average is found in~the data. % (see \Tref{number_of_substitutions}).  
 
-The Czech WordNet 1.9 PDT contains paraphrases of high quality, however, their amount is 
-insufficient for~our purposes. It contains 13k pairs of synonymous lemmas and only one 
-paraphrase per four sentences on~average is found in~the data (see \Tref{number_of_substitutions}).  
-For that reason, we employ the Czech Meteor Paraphrase tables, too. They are quite the 
-opposite of Czech WordNet -- they are large in size, but contain a lot of noise.
+On~the other hand, Czech Meteor Paraphrase tables are quite the opposite of Czech WordNet -- 
+they are large in size, but contain a lot of noise as they are constructed automatically 
+from parallel data via pivoting \cite{pivoting}. 
+
+The noise was particularly high among the multiword paraphrases -- for example: \textit{svého názoru} 
+(its opinion) and \textit{šermovat rukama a mlátit neviditelného} (to flail one's arms and to beat 
+the invisible one) are selected as a paraphrase. In \newcite{barancikova:2014}, we show that the amount 
+of noise in the multi-word paraphrases is so high that no automatic filtering method we used outperforms 
+omitting them completely.
+
+Among one-word paraphrases the noise is sparser, but there are still pairs like \textit{1873} - 
+\textit{pijavice} (a leech) or \textit{afgh\'{a}nci} (Afghans) - \textit{š\v{t}astně} (happily) 
+identified as synonyms. However, the biggest problem is that most of synonymous pairs were just 
+different word forms of the same lemma. 
+
+We therefore attempt to automatically filter the Meteor table, the methods are described in Section 
+\ref{filtering-section}
+
+
+%\begin{table}[tb]
+%\begin{center}
+%\scalebox{0.97}{
+%\begin{tabular}{l|ccc}
+%& WMT12 & WMT13 & WMT14\\
+%\hline
+%WordNet            & 0.26 & 0.22 & 0.24\\
+%filtered Meteor    & 1.53 & 1.29 & 1.39\\
+%together           & 1.59 & 1.34 & 1.44\\
+%\end{tabular}}
+%\caption{Average number of one-word paraphrases per sentence found in WordNet, 
+%filtered Meteor tables and their union over all systems.}
+%\label{number_of_substitutions}
+%\end{center}
+%\end{table}
+
+
 
 We attempt to reduce the noise in the Czech Meteor Paraphrase tables in the following way. We 
 keep only pairs consisting of single words since we were not successful in reducing the noise
@@ -319,53 +330,6 @@ data. %We discuss it in \ref{vysledky}.
 %based method of filtering paraphrases consisting of pairs of single words, which is used in subsection 
 %\ref{zdroje_parafrazi}. From several methods of paraphrasing, we achieved the best results a with simple greedy 
 %method, which is presented in section \ref{creating_new_references}.
-%
-%\section{Data}
-%We perform our experiments on data sets from the English-to-Czech translation task 
-%of WMT12 \cite{wmt12}, WMT13 \cite{wmt13} and WMT14 \cite{wmt14}. The 
-%data sets contain 13/14\footnote{We use only 12 of them because two of them (FDA.2878 
-%and online-G) have no human judgments.}/10 files with Czech outputs of MT systems.
-%In addition, each data set contains one file with corresponding reference sentences and one with original 
-%English source sentences. We perform morphological analysis and tagging 
-%of the hypotheses and the reference sentences using Morče \cite{morce:2007}.
-%
-%The human judgment of hypotheses is available as a relative ranking of performance of 
-%five systems for~a~sentence. We calculated the score for every system by the “$ > $ others” 
-%method \cite{bojar-grains}, which was the WMT12 official system score. It is computed 
-%as $ \frac{wins}{wins+loses} $. We refer to this interpretation of human judgment as 
-%\textit{silver standard} to distinguish it from the official system scores, which were 
-%computed differently each year (here referred to as \textit{gold standard}).
-%
-%\subsection{Sources of Paraphrases}
-%\label{zdroje_parafrazi}
-%We use two available sources of Czech paraphrases -- the Czech WordNet 1.9 PDT 
-%\cite{czech-wordnet} and the Meteor Paraphrase Tables \cite{meteor-tables}. 
-%
-%\begin{table}[tb]
-%\begin{center}
-%\scalebox{0.97}{
-%\begin{tabular}{l|ccc}
-%& WMT12 & WMT13 & WMT14\\
-%\hline
-%WordNet            & 0.26 & 0.22 & 0.24\\
-%filtered Meteor    & 1.53 & 1.29 & 1.39\\
-%together           & 1.59 & 1.34 & 1.44\\
-%\end{tabular}}
-%\caption{Average number of one-word paraphrases per sentence found in WordNet, 
-%filtered Meteor tables and their union over all systems.}
-%\label{number_of_substitutions}
-%\end{center}
-%\end{table}
-%
-%The Czech WordNet 1.9 PDT contains paraphrases of high quality, however, their amount is 
-%insufficient for~our purposes. It contains 13k pairs of synonymous lemmas and only one 
-%paraphrase per four sentences on~average is found in~the data (see \Tref{number_of_substitutions}).  
-%For that reason, we employ the Czech Meteor Paraphrase tables, too. They are quite the 
-%opposite of Czech WordNet -- they are large in size, but contain a lot of noise.
-%
-%We attempt to reduce the noise in the Czech Meteor Paraphrase tables in the following way. We 
-%keep only pairs consisting of single words since we were not successful in reducing the noise
-%effectively for the multi-word paraphrases \cite{barancikova2014}. 
 %
 %Using Morče, we first perform morphological analysis of all one-word pairs and replace 
 %the word forms with their lemmas.  We keep only pairs of different lemmas. Further, we
