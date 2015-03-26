@@ -63,31 +63,37 @@ significantly higher correlation with human judgment than Meteor on the WMT12 an
 \end{abstract}
 
 \section{Introduction}
-%Metrics for automatic evaluation of machine translation (MT) are essential not 
-%only for measuring the quality of translations and comparing different systems 
-%and approaches, but also for the development and tuning of the translation systems 
-%themselves.
-The evaluation of machine translation (MT) systems is a very important task not only 
-for measuring the quality of translations and comparing different systems and 
-approaches, but for the development and tuning of the translations systems as well. 
+Since the very first appearance of machine translation (MT) systems, a necessity
+for their objective evaluation and comparison arose. The traditional human evaluation 
+while being the most reliable has serious drawbacks -- it is time-consuming and expensive.
+.%, although there were recently successful attempts to overcome this problem using crowdsourcing techniques. [\markcite{{\it Callison-Burch}, 2009]} and [\markcite{{\it Bentivogli et al.}, 2011]} demonstrate that the average score of high number of non-expert low-paid annotators shows high agreement with gold standards provided by expert annotators in various natural language processing (NLP) tasks including machine translation evaluation.
 
-Human evaluation while being the most reliable has serious drawbacks. It is time-consuming 
-and expensive.%, although there were recently successful attempts to overcome this problem using crowdsourcing techniques.  [\markcite{{\it Callison-Burch}, 2009]} and [\markcite{{\it Bentivogli et al.}, 2011]} demonstrate that the average score of high number of non-expert low-paid annotators shows high agreement with gold standards provided by expert annotators in various natural language processing (NLP) tasks including machine translation evaluation.
-The main problem of human evaluation is that it is highly dependent on the person annotating 
-and that there is generally very low agreement between several human annotators \cite{wmt12}. 
-Moreover, it is practically impossible to repeat the experiments with the same results. 
-%[Bojar - kniha]  %nizka shoda pro cestinu?!! Ani ne kniha, ale spis wmt13, co 14?, kde to byla
-% nejak hrozive nizka shoda..
+However, the main problem of human evaluation is that it is highly dependent on the 
+person annotating and there is generally very low agreement between several human
+annotators. %footnote - example, only blah blah correlation during \cite{wmt12}.
+Moreover, it is practically impossible to repeat the evaluation with the same
+results (TODO: nejaka citace).
+%[Bojar - kniha] %nizka shoda pro cestinu?!! Ani ne kniha, ale spis wmt13, co 14?, 
+% kde to byla nejak hrozive nizka shoda..
 
-The first metric correlating well with human judgment was BLEU \cite{bleu} and it 
-still remains the most common metric for MT evaluation, even though other, 
+Due to being slow and unreproducible, it is impossible to use human evaluation
+for tuning and development of MT systems. Well-performing automatic MT evaluation
+metrics are essential precisely for these tasks.
+
+The first metric correlating well with human judgment was BLEU \cite{bleu} and
+it still remains the most common metric for MT evaluation, even though other,
 better-performing metrics exist. \cite{wmt13-metrics} %sem mozna uz wmt14?
 
-BLEU is computed from the number of phrase overlaps between the translated 
-% sem by se hodil asi opravdovej vzorecek misto  jen zminy
-sentence and the corresponding reference sentences, i.e., translations made 
-by a human translator. However, the standard practice is using only one 
-reference sentence and BLEU then tends to perform badly (see \Fref{example_of_BLEU_malfunction}). 
+BLEU is computed from the number of phrase overlaps between the translated
+% sem by se hodil asi opravdovej vzorecek misto jen zminy. nebo jen odkaz
+% do sekce Automatic metrics?? asi tak
+sentence (hypothesis) and the corresponding reference sentences, i.e., translations
+made by a human translator. However, the standard practice is using only one reference
+sentence and BLEU then tends to perform badly. As there are many translations of 
+a single sentence, even a perfectly correct machine translation might get a low score 
+due different wording and disregarding synonymous expressions (see \Fref{example_of_BLEU_malfunction}). 
+This is especially valid for morphologically rich languages with free word order like 
+the Czech language. \cite{bojar-tackling-sparse-data}
 
 \begin{figure*}[htb]
 \begin{center}
@@ -125,25 +131,10 @@ to the BLEU score. There is only one unigram overlapping.}
 \label{example_of_BLEU_malfunction}
 \end{figure*}
 
-As there are many translations of a single sentence, even a perfectly correct 
-machine translation might get a low score due to disregarding synonyms and 
-paraphrase expressions. This is especially valid for morphologically rich 
-languages like the Czech language. \cite{bojar-tackling-sparse-data}
-
-%
-
-
 We aim to achieve higher accuracy of MT evaluation by targeted paraphrasing 
 of reference sentences, i.e. creating a new synthetic reference sentence that 
 is still correct and keeps the meaning of the original sentence, but at the 
-same time it is closer in wording to the MT output (hypothesis). 
-
-There is a close resemblance between translation and paraphrasing. They both 
-attempt to preserve the meaning of a sentence, the first one between two languages 
-and the second one within one language by different word choice. \cite{madnani:2010} 
-However, there are many more tools for MT than for paraphrasing. Therefore, it 
-seems only natural to attempt to adjust some MT tools to translate within a 
-single language for targeted paraphrasing. 
+same time it is closer in wording to the MT output. 
 
 
 \section{Related Work}
@@ -296,9 +287,22 @@ data. %We discuss it in \ref{vysledky}.
 
 
 
-\subsection{New synthetic reference}
+\section{New synthetic reference}
+
+\subsection{Simple greedy substitution}
+
+\subsection{Paraphrasing using Machine Translation}
+There is a close resemblance between translation and paraphrasing. They both 
+attempt to preserve the meaning of a sentence, the first one between two languages 
+and the second one within one language by different word choice. \cite{madnani:2010} 
+However, there are many more tools for MT than for paraphrasing. Therefore, it 
+seems only natural to attempt to adjust some MT tools to translate within a 
+single language for targeted paraphrasing. 
+
+\subsubsection{Phrase based Machine Translation}
 
 
+\subsubsection{Rule based Machine Translation}
 %Our method is independent of the evaluation metric used. % We achieve highest correlations with Meteor and 
 %In this paper, we use Meteor for its consistently high correlation with human judgment and we 
 %attempt to~tune it further by modifying its paraphrase tables. We show 
