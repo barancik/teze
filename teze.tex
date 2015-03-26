@@ -88,8 +88,9 @@ BLEU is computed from the number of phrase overlaps between the translated
 % sem by se hodil asi opravdovej vzorecek misto jen zminy. nebo jen odkaz
 % do sekce Automatic metrics?? asi tak
 sentence (hypothesis) and the corresponding reference sentences, i.e., translations
-made by a human translator. However, the standard practice is using only one reference
-sentence and BLEU then tends to perform badly. As there are many translations of 
+made by a human translator. Its main advantage is its simplicity and language independence. 
+However, the standard practice is using only one reference sentence and BLEU then tends 
+to perform badly. As there are many translations of 
 a single sentence, even a perfectly correct machine translation might get a low score 
 due different wording and disregarding synonymous expressions (see \Fref{example_of_BLEU_malfunction}). 
 This is especially valid for morphologically rich languages with free word order like 
@@ -138,27 +139,58 @@ same time it is closer in wording to the MT output.
 
 
 \section{Related Work}
-There are two attitudes towards solving the problem - one is to change the automatic metric itself to be tolerant to other sentence representation and the other one is to preprocess automatically the reference sentence to new synthetic reference that is closer in wording to the original reference sentence and keeps its meaning and grammatical correctness.
-\subsection{New synthetic references}
-Our paraphrasing work is inspired by \newcite{kauchak}. They are trying to improve the 
-accuracy of~MT evaluation of Chinese-to-English translation by targeted paraphrasing, i.e.~making 
-a~reference closer in wording to a hypothesis (MT output) while keeping its meaning and correctness.
+There are two attitudes towards solving the problem - one is to change the automatic
+metric itself to be tolerant to other sentence representation and the other one is to 
+preprocess automatically the reference sentence to new synthetic reference that is closer 
+in wording to the original reference sentence and keeps its meaning and grammatical correctness.
 
-Having a hypothesis $ H = h_1,...,h_n $ and its corresponding reference translation $ R =r_1, ...,r_m $,
-they select a~set of~candidates $ C = \lbrace \langle r_i,h_j \rangle  \vert r_i \in R \setminus H
- , h_j \in H \setminus R \rbrace $. 
+\subsection{New synthetic references}
+Targeted paraphrasing for MT evaluation is introduced in~\newcite{kauchak}. They 
+improve the accuracy of~MT evaluation of Chinese-to-English translation by targeted 
+paraphrasing.
+
+Having a hypothesis $ H = h_1,...,h_n $ and its corresponding reference translation 
+$ R =r_1, ...,r_m $, they select a~set of~candidates 
+$ C = \lbrace \langle r_i,h_j \rangle  \vert r_i \in R \setminus H, h_j \in H \setminus R \rbrace $. 
  
-$ C $~is reduced to pairs of words appearing in~the~same WordNet \cite{wordnet} synset only. For every pair 
+$ C $~is reduced to pairs of words appearing in~the~same WordNet synset only. For every pair 
 $  \langle r_i,h_j \rangle \in C $, $ h_j $ is evaluated in the context $ r_1,...,r_{i-1},\square,r_{i+1},...,r_m $
 and if confirmed, the new reference sentence $ r_1,...,r_{i-1},h_j,r_{i+1},...,r_m $ is created.
 This way, several reference sentences might be created, all with a single changed word with respect
 to the original one.
 
-This solution is not quite possible to apply to the Czech language - as a Czech word has typically a 
-many wordform that is typically dependent on its neighbours.
+%
+%Targeted paraphrasing for MT evaluation is introduced in~\newcite{kauchak}. They 
+%focus on lexical substitution in Chinese-to-English translations. 
+%They select all pairs of words for which one word appears in a reference sentence,
+%second word in a hypothesis (the MT output), but none of them in both. They keep 
+%only pairs of synonymous words, i.e. words appearing in the same WordNet 
+%\cite{wordnet} synset. Each such a pair of words was further contextually evaluated. 
+%For every confirmed synonym, a new reference sentence is created by placing it to the
+%reference sentence on the position of its synonym.
+%
 
+This solution is not quite possible to apply to the Czech language. As Czech belongs 
+among~inflective languages with rich morphology, a Czech word has typically many forms 
+and the correct form depends heavily on its context, e.g., cases of nouns depend on verb 
+valency frames. Changing a single word may result into not grammatical sentence. Therefore, 
+we do not attempt to~change a~single word in~a~reference sentence but we focus on~creating 
+one single correct reference sentence.
+
+%jeste zapojit \cite{Zhou:2006}
 
 \subsection{Automatic Metrics}
+BLEU (and other commonly used metrics - NIST \cite{nist}, TER \cite{ter} etc.) 
+disregards synonymous phrases and word form variants. One way how to  alleviate this 
+drawback is to include paraphrases to the evaluation metric (e.g. METEOR \cite{meteor}). 
+
+But this often awards even sentences with paraphrases that are not grammatically correct. 
+We take a different approach by transforming a reference translation into a sentence that 
+is closer to the MT output and keeps its original meaning and correctness.
+
+There are several metrics that include paraphrase support, however only the Meteor metric
+is available for Czech language too.%TODO: preformulovat
+
 \subsubsection{Meteor}
 The Meteor metric \cite{meteor-wmt:2011} has shown high correlation with human 
 judgement since its appearance. It outperforms traditional metrics like BLEU \cite{bleu} 
@@ -290,6 +322,19 @@ data. %We discuss it in \ref{vysledky}.
 \section{New synthetic reference}
 
 \subsection{Simple greedy substitution}
+We started with a simple greedy substitution similar to \cite{kauchak}.
+ 
+Grammatical correctness of~the new reference sentence is provided by applying Depfix on 
+newly created paraphrases. Depfix is a system for post-editing English-to-Czech machine 
+translation outputs. We adjusted it to fix the errors in paraphrased sentences.
+Due to a noisy source of our paraphrases, we experiment with adding word alignment. However, 
+the alignment reduces the number of paraphrases found and the best results were achieved 
+by~a~simple greedy method with only one-word paraphrases thanks to their intensive filtering.
+BLEU scores computed using these new reference sentences show significantly higher correlation 
+with human judgment than scores computed on the original reference sentences.
+\newline \Keywords{paraphrases, machine translation, evaluation}}
+
+
 
 \subsection{Paraphrasing using Machine Translation}
 There is a close resemblance between translation and paraphrasing. They both 
