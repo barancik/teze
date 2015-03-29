@@ -47,19 +47,19 @@
 
 \maketitle
 \begin{abstract}
-This paper describes Parmesan, our submission to~the 2014 Workshop on Statistical
-Machine Translation (WMT) metrics task for evaluation English-to-Czech translation. 
-%This metric is basically an adaptation of~Meteor to~higher quality paraphrases.
-We show that the Czech Meteor Paraphrase tables are so noisy that they actually can harm 
-the performance of the metric. However, they can be very useful after extensive filtering 
-in targeted paraphrasing of Czech reference sentences prior to the evaluation.
-Parmesan first performs targeted paraphrasing of reference sentences, then it computes 
-the Meteor score using only the exact match on~these new reference sentences. It shows 
-significantly higher correlation with human judgment than Meteor on the WMT12 and WMT13 data. 
-%Using the reduced and modified Czech Meteor Paraphrase tables and WordNet, Parmesan first creates 
-%for every hypothesis a new reference sentence that is closer in~wording to the hypothesis, but 
-%keeps its original meaning and correctness. Then it computes the Meteor score using only the 
-%exact match on~these new reference sentences.
+This thesis is concentrated on improving an accuracy of machine translation
+to Czech language using targeted paraphrasing. We develop system that creates
+new synthetic reference that are closer in wording to a corresponding machine
+translations. Using these new reference sentences makes evaluation using traditional
+metrics is more reliable as they lack of paraphrase support and have no sympathy
+for a free word order.
+
+We believe that after implementation, the system for generating new syntetic
+references will be very beneficial not only for MT evaluation, but mainly
+inside MT systems for improved tuning and development of the systems. This way,
+it will directly influence the quality of machine translation itself.
+
+%Trade-off between simplicity and quality of MT metric!!
 \end{abstract}
 
 \section{Introduction}
@@ -224,6 +224,7 @@ significantly higher correlation with human judgment than Meteor on the WMT12 an
 %exact match on~these new reference sentences.
 
 \section{Data}
+\subsection{Text Data}
 We perform our experiments on data sets from the English-to-Czech translation 
 task of WMT12 \cite{wmt12}, WMT13 \cite{wmt13} and WMT14 \cite{wmt14}. The data 
 sets contain 13/14\footnote{We use only 12 of them because two of them (FDA.2878 
@@ -241,6 +242,7 @@ as $ \frac{wins}{wins+loses} $. We refer to this interpretation of human judgmen
 computed differently each year (here referred to as \textit{gold standard}).
 
 \subsection{Sources of Paraphrases}
+\label{meteori}
 We make use of all existing sources of Czech paraphrases -- the Czech WordNet 1.9 PDT 
 \cite{czech-wordnet}, the Meteor Paraphrase Tables \cite{meteor-tables} and Czech PPDB %TODO: cite 
 , which recently became available.
@@ -286,6 +288,81 @@ We therefore attempt to automatically filter the Meteor table, the methods are d
 %\end{center}
 %\end{table}
 
+\subsubsection{Filtering the Meteor Tables}
+\label{filtering-section}
+We try to remove the noise from the data with two different methods. The first
+one is based on manual error analysis and it is applied to~one-word pairs only.
+The second one is fully automatic and can be applied on all data, but its results 
+are inconclusive. Therefore, we employ only the first method in the rest of our 
+experiments.
+
+\subsection{Error-analysis Based Filtering}
+
+We manually examine sentences after paraphrasing using only Meteor tables. Based on
+our observation, we perform the following operations on pairs of one-word paraphrases 
+from the Meteor tables:
+
+\begin{itemize}
+\item morphological analysis using Morče \cite{morce:2007} and replacing of word forms with their lemmas; 
+\item removing pairs of identical lemmas;
+\item removing pairs with different part of speech;
+\item removing pairs of unknown words (typically foreign words).
+\end{itemize}
+
+The last two rules have a single exception -- paraphrases consisting of numeral and 
+corresponding digits, e.g., \textit{osmnáct} (eighteen) and \textit{18}.\footnote{
+\textit{0smnáct} has the part of speech \textit{C}, which is designated for numerals, 
+\textit{18} is marked with \textit{X} meaning it is an unknown word for the morphological
+analyzer.} These paraphrases are very common in the data. 
+
+This way we reduce more than 160 000 pairs of one word paraphrases to only 32 154
+couples of lemmas. All examples of bad one-word paraphrases from Subsection \ref{meteori} 
+are removed.
+
+\subsection{Automatic Filtering}
+Filtering strategies described in~this section are based on assigning a score to
+each paraphrase pair. We then gradually remove paraphrases with low scores and
+measure the effect on~the final correlation of~our metric.
+
+The first, straightforward approach is to use the paraphrase scores already
+provided in Meteor. They are based on~phrasal translation probabilities
+and it corresponds to~paraphrase probability in~the pivoting model.
+
+We propose an alternative scoring based on pivoting and lexical translation
+scores:
+
+$$\text{lex\_p}(\mathbf{s},\mathbf{t}) = \sum_{s \in \mathbf{s}}\sum_{t \in
+\mathbf{t}}\sum_{pivot}\text{lex}(s|pivot)\text{lex}(pivot|t)$$
+
+In this case, pivots are all words aligned to both $s$ and $t$ in the parallel
+data. To get lexical translation probabilities, we use maximum likelihood
+estimation from single best word alignment computed on CzEng 1.0
+\cite{czeng10:lrec2012}. We refer to this score as \emph{lexical
+pivoting}.
+
+We use random selection as the baseline -- paraphrases are simply shuffled and we
+then use the first 10, 20,$\ldots$ percent of them.
+
+We only evaluate the filtering techniques on the WMT12 data. First, we attempt
+to filter one-word paraphrases and use the cleaner paraphrase table in the
+\emph{one-word-only} paraphrasing strategy. Note that our paraphrase table has
+already been filtered using the error-analysis based filtering described above.
+
+\Fref{fig:filtering-lexical} shows the performance of different filtering
+techniques for one-word paraphrases. Relying on Meteor scores proves worse than
+random selection. Using lexical pivoting, we can keep a high correlation even if we
+throw away as much as 90\% of the paraphrases, however we do not improve 
+(by~a~relevant margin) upon the baseline correlation of 0.802 achieved by
+\emph{one-word-only} paraphrasing with the full paraphrase table.
+
+We evaluate the best-performing technique also in the \textit{multi-word-first}
+scenario where we use it for filtering multi-word paraphrases (see
+\Fref{fig:filtering-mwe}). As we reduce the number of paraphrases, we observe a
+considerable improvement of~correlation, however we never outperform
+\textit{one-word-only} or \textit{one-word-first}. In this case, the filtering
+simply mitigates the damage done by the multi-word paraphrases. We
+cannot hope to achieve a higher score without a~more fine-grained grip on what
+a~good multi-word paraphrase is.
 
 
 We attempt to reduce the noise in the Czech Meteor Paraphrase tables in the following way. We 
@@ -300,9 +377,129 @@ unknown word (typically a~foreign word).
 In this way we have reduced 684k paraphrases in~the original Czech Meteor Paraphrase tables 
 to~only 32k pairs of lemmas. We refer to~this table as~filtered Meteor.
 
+\section{New synthetic reference}
+In following section, we present our methods of paraphrasing reference sentence. We started
+with simple greedy substitution similar to \cite{kauchak}. Then we used machine translation
+systems themselves to create new references.
 
-\section{Parmesan}
+\subsection{Simple greedy substitution}
+We experiment with several algorithms for paraphrasing reference sentences. They differ
+in the method for selecting potential paraphrase pairs and in the choice of paraphrases.
 
+\subsubsection{Candidate Selection}
+We select potential paraphrases using two different methods. The first one is a simple 
+greedy search similar to~\newcite{kauchak}, the other one uses automatic word alignment 
+for selecting corresponding segments of~the reference sentence and the hypothesis.
+
+\begin{description}
+\item[Simple Greedy Method]
+%\subsubsection{Simple Greedy Method}
+Let $ r_1,..., r_n $,$ w_1,...,w_m $ be the hypothesis and the reference sentence, 
+respectively. We performed their tagging and extracted sets of lemmas $ W_{L} $, $ R_{L} $.  
+Then, one-word paraphrase candidates are chosen as:
+$$ C_{L} = \lbrace (r,w) | r \in R_{L} \smallsetminus W_{L} \wedge w \in W_{L}
+\smallsetminus R_{L}  \rbrace $$
+
+Multi-words candidates $ C_M $ are selected as the Cartesian product of all sequences
+from the reference sentence and all sequences from the hypothesis. Maximum phrase length 
+is seven words, because that is the length of~the longest paraphrases in the data. Formally:
+
+\begin{gather*}
+C_{M} = \lbrace (<r_i,..,r_{i+x}>, <w_j,...,w_{j+y}>) | \: 1 \leq i \leq n-x \: \wedge \\ 
+ \: 1~\leq~j \leq m-y  \: \wedge \: 0 \leq x,y \leq 6 \: \wedge \: (x \neq 0 \vee y \neq 0) \rbrace 
+\end{gather*}
+\item[Word and Phrase Alignments]
+%\subsubsection{Word and Phrase Alignments}
+%Due to a noisy source of our paraphrases, we experiment with adding word alignment.
+One possible way to make the algorithm more reliable is to restrict the application of 
+paraphrases to words/phrases which are aligned to each other. We compute word alignment 
+between the reference translation and MT system outputs using GIZA++ \cite{gizapp}.
+
+However, if we used only our test data to create the alignment (13 x 3003 + 12 x 3000 
+= 75039 sentence pairs), the alignment quality would be insufficient. In order to make the 
+training data for word alignment larger, we take advantage of the fact that all outputs are 
+translations of the same data and also add all pairs of system outputs to our data, creating 
+over 1,000,000 \equo{artificial} sentence pairs. For example, the parallel data for WMT12 then 
+looks as follows:
+
+\begin{center}
+\begin{tabular}{ll}
+Source & Target \\
+\hline
+system 1 & system 2 \\
+system 1 & system 3 \\
+... & ...\\
+system 1 & system 13 \\
+system 1 & reference \\
+system 2 & system 1 \\
+system 2 & system 3 \\
+... & ... \\
+system 13 & reference \\
+\end{tabular}
+\end{center}
+
+We also experiment with adding much larger synthetic parallel data created by
+machine translation (note that we need Czech-Czech data) but there was no impact
+on the quality of paraphrasing so we follow the outlined approach which requires
+no additional data or processing.
+
+The set of~one-word candidates $C_L$ is then simply the set of all word pairs such
+that there exists an alignment link between them. The set $C_M$ is extracted
+using phrase extraction for phrase-based MT, the standard consistency criterion
+is~applied \cite{Och99improvedalignment}.
+\end{description}
+
+\subsubsection{Paraphrasing}
+We reduce the set $ C_{L} $ to pairs appearing in our paraphrase tables in the 
+following way. If a word appears in several synonymous pairs we give preference 
+to those found in~WordNet or even better in the intersection of paraphrases from 
+WordNet and filtered Meteor. Similarly, we filter $ C_{M} $ to pairs also contained 
+in the multi-word Meteor tables.
+
+We evaluate three different paraphrasing methods which differ in the order of
+substitution.
+
+\begin{description}
+\item[One-word only] We proceed word by word from the beginning of the reference 
+sentence to~its end. If a~lemma of~a~word appears as~the first member of~a~pair 
+in reduced $ C_{L} $, it is replaced by~the word from hypothesis that has its lemma
+as the second element of~that pair, i.e., paraphrase from the hypothesis. Otherwise, 
+we keep the original word from the reference sentence.
+\item[One-word first] We use \textit{One-word only} and then we apply longer paraphrases.
+In that case we move ahead from the longest paraphrases to the shortest. That is because 
+Meteor contains often even components of~phrases and we could substitute, instead of~whole 
+phrase, only part of~it. We do not attempt to replace any word that was already changed 
+before.
+\item[Multi-word first] We substitute the longest confirmed paraphrases from
+$ C_{M} $ and move to the shorter ones. We replace again only sequences that have not
+been substituted yet. After this, we paraphrase the remaining unchanged words
+with the \textit{One-word only} method.
+\end{description}
+
+\subsubsection{Depfix}
+As we substitute a word form directly from a hypothesis, it may happen that a resulting
+new reference is not grammatically correct. To rectify this, we apply Depfix \cite{depfix} 
+-- an automatic post-editing system which is able to fix Czech sentences containing 
+grammatical errors.
+
+Depfix was originally designed for post-editing outputs of English-to-Czech 
+phrase-based machine translation. It consists of a set of~linguistically-motivated rules 
+and a statistical component that correct various kinds of errors, especially in grammar 
+(e.g. morphological agreement), using a range of natural language processing tools to 
+provide analyses of the input sentences.
+
+We observe that the errors that appear in the outputs of our paraphrasing algorithm are 
+often similar to some errors appearing in outputs of phrase-based machine translation systems, 
+e.g errors in morphological agreement are very common. This makes Depfix a good fit for fixing 
+the errors, since typical grammar correcting tools, such as a grammar-checker in a word processor, 
+focus on errors that are typical for humans, not for machines. 
+
+\subsubsection{Results}
+We evaluate the method on datasets from WMT12 and WMT13.
+
+
+\subsection{Parmesan}
+%Parmesan spis subsekce LRECu
 
 Parmesan\footnote{PARaphrasing for MEteor SANs paraphrases} starts with a simple greedy algorithm for 
 substitution of synonymous words from a hypothesis in its corresponding reference sentence. Further, 
@@ -316,24 +513,6 @@ with both exact and paraphrase match on original references. However, this resul
 data. %We discuss it in \ref{vysledky}.
 
 %We perform our experiments on~English-to-Czech translations, but the method is largely language independent.
-
-
-
-\section{New synthetic reference}
-
-\subsection{Simple greedy substitution}
-We started with a simple greedy substitution similar to \cite{kauchak}.
- 
-Grammatical correctness of~the new reference sentence is provided by applying Depfix on 
-newly created paraphrases. Depfix is a system for post-editing English-to-Czech machine 
-translation outputs. We adjusted it to fix the errors in paraphrased sentences.
-Due to a noisy source of our paraphrases, we experiment with adding word alignment. However, 
-the alignment reduces the number of paraphrases found and the best results were achieved 
-by~a~simple greedy method with only one-word paraphrases thanks to their intensive filtering.
-BLEU scores computed using these new reference sentences show significantly higher correlation 
-with human judgment than scores computed on the original reference sentences.
-\newline \Keywords{paraphrases, machine translation, evaluation}}
-
 
 
 \subsection{Paraphrasing using Machine Translation}
