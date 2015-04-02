@@ -247,13 +247,13 @@ We make use of all existing sources of Czech paraphrases -- the Czech WordNet 1.
 \cite{czech-wordnet}, the Meteor Paraphrase Tables \cite{meteor-tables} and Czech PPDB %TODO: cite 
 , which recently became available.
 
-The Czech WordNet 1.9 PDT is derived from the WordNet \cite{wordnet} by automatic translation 
+The \textbf{Czech WordNet 1.9 PDT} is derived from the WordNet \cite{wordnet} by automatic translation 
 followed by manual verification. It~contains rather high quality lemmatized paraphrases. However 
 their amount is~insufficient for our purposes %(see\Tref{number_of_substitutions}).  
 %It contains 13k pairs of synonymous lemmas and 
 - only one paraphrase per four sentences on~average is found in~the data. % (see \Tref{number_of_substitutions}).  
 
-On~the other hand, Czech Meteor Paraphrase tables are quite the opposite of Czech WordNet -- 
+On~the other hand, Czech \textbf{Meteor Paraphrase tables} are quite the opposite of Czech WordNet -- 
 they are large in size, but contain a lot of noise as they are constructed automatically 
 from parallel data via pivoting \cite{pivoting}. 
 
@@ -268,9 +268,9 @@ Among one-word paraphrases the noise is sparser, but there are still pairs like 
 \textit{pijavice} (a leech) or \textit{afgh\'{a}nci} (Afghans) - \textit{š\v{t}astně} (happily) 
 identified as synonyms. However, the biggest problem is that most of synonymous pairs were just 
 different word forms of the same lemma. We performed automatically filtering among the one-word
-paraphrases in the Meteor table, the method are described in \Sref{filtering-section}.
+paraphrases in the Meteor table in the following way. %, the method are described in \Sref{filtering-section}.
 
-
+%
 %\begin{table}[tb]
 %\begin{center}
 %\scalebox{0.97}{
@@ -286,50 +286,30 @@ paraphrases in the Meteor table, the method are described in \Sref{filtering-sec
 %\label{number_of_substitutions}
 %\end{center}
 %\end{table}
-
-\subsubsection{Filtering the Meteor Tables}
-\label{filtering-section}
-We try to remove the noise from the data with two different methods. The first
-one is based on manual error analysis and it is applied to~one-word pairs only.
-The second one is fully automatic and can be applied on all data, but its results 
-are inconclusive. Therefore, we employ only the first method in the rest of our 
-experiments.
-
-\subsection{Error-analysis Based Filtering}
-We manually examine sentences after paraphrasing using only Meteor tables. Based on
-our observation, we perform the following operations on pairs of one-word paraphrases 
-from the Meteor tables:
-
-\begin{itemize}
-\item morphological analysis using Morče \cite{morce:2007} and replacing of word forms with their lemmas; 
-\item removing pairs of identical lemmas;
-\item removing pairs with different part of speech;
-\item removing pairs of unknown words (typically foreign words).
-\end{itemize}
-
-The last two rules have a single exception -- paraphrases consisting of numeral and 
-corresponding digits, e.g., \textit{osmnáct} (eighteen) and \textit{18}.\footnote{
-\textit{0smnáct} has the part of speech \textit{C}, which is designated for numerals, 
-\textit{18} is marked with \textit{X} meaning it is an unknown word for the morphological
-analyzer.} These paraphrases are very common in the data. 
-
-This way we reduce more than 160 000 pairs of one word paraphrases to only 32 154
-couples of lemmas. All examples of bad one-word paraphrases from Subsection \ref{meteori} 
-are removed.
-
-
-
-We attempt to reduce the noise in the Czech Meteor Paraphrase tables in the following way. We 
-keep only pairs consisting of single words since we were not successful in reducing the noise
-effectively for the multi-word paraphrases \cite{barancikova2014}. 
+%
+%\subsubsection{Filtering the Meteor Tables}
+%\label{filtering-section}
+%We try to remove the noise from the data with two different methods. The first
+%one is based on manual error analysis and it is applied to~one-word pairs only.
+%The second one is fully automatic and can be applied on all data, but its results 
+%are inconclusive. Therefore, we employ only the first method in the rest of our 
+%experiments.
+%
+%\subsection{Error-analysis Based Filtering}
+We manually examine sentences after paraphrasing using only Meteor tables. Based on the 
+most common error in paraphrased sentences, we perform the following operations on pairs 
+of one-word paraphrases from the Meteor tables:
 
 Using Morče, we first perform morphological analysis of all one-word pairs and replace 
 the word forms with their lemmas.  We keep only pairs of different lemmas. Further, we
- dispose of pairs of words that differ in their parts of speech (POS) or~contain an 
-unknown word (typically a~foreign word). 
+dispose of pairs of words that differ in their parts of speech (POS)\footnote{With a single 
+exception -- paraphrases consisting of numeral and corresponding digits, e.g., \textit{osmnáct} 
+(eighteen) and \textit{18} - \textit{0smnáct} has the part of speech \textit{C}, which is 
+designated for numerals, \textit{18} is marked with \textit{X} meaning it is an unknown word 
+for the morphological analyzer.} or~contain an unknown (typically foreign) word.
 
 In this way we have reduced 684k paraphrases in~the original Czech Meteor Paraphrase tables 
-to~only 32k pairs of lemmas. We refer to~this table as~filtered Meteor.
+to~only 32k pairs of lemmas. We refer to~this table as~\textit{filtered Meteor}.
 
 \section{New synthetic references}
 In this section, we present our methods of paraphrasing reference sentences. We started
@@ -928,7 +908,7 @@ single language for targeted paraphrasing.
 
 \section*{Appendix}
 \label{multiword_filtering}
-\subsection{Automatic Filtering of Meteor tables}
+\subsection*{Automatic Filtering of Meteor tables}
 Filtering strategies described in~this section are based on assigning a score to
 each paraphrase pair. We then gradually remove paraphrases with low scores and
 measure the effect on~the final correlation of~our metric.
