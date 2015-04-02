@@ -259,17 +259,16 @@ from parallel data via pivoting \cite{pivoting}.
 
 The noise was particularly high among the multiword paraphrases -- for example: \textit{svého názoru} 
 (its opinion) and \textit{šermovat rukama a mlátit neviditelného} (to flail one's arms and to beat 
-the invisible one) are selected as a paraphrase. In \newcite{barancikova:2014}, we show that the amount 
+the invisible one) are selected as a paraphrase. In \ref{multiword_filtering}, we show that the amount 
 of noise in the multi-word paraphrases is so high that no automatic filtering method we used outperforms 
-omitting them completely.
+omitting them completely. Therefore, we used the multiword paraphrases only in our first experiment (see
+\Sref{lrec}.
 
 Among one-word paraphrases the noise is sparser, but there are still pairs like \textit{1873} - 
 \textit{pijavice} (a leech) or \textit{afgh\'{a}nci} (Afghans) - \textit{š\v{t}astně} (happily) 
 identified as synonyms. However, the biggest problem is that most of synonymous pairs were just 
-different word forms of the same lemma. 
-
-We therefore attempt to automatically filter the Meteor table, the methods are described in Section 
-\ref{filtering-section}
+different word forms of the same lemma. We performed automatically filtering among the one-word
+paraphrases in the Meteor table, the method are described in \Sref{filtering-section}.
 
 
 %\begin{table}[tb]
@@ -297,7 +296,6 @@ are inconclusive. Therefore, we employ only the first method in the rest of our
 experiments.
 
 \subsection{Error-analysis Based Filtering}
-
 We manually examine sentences after paraphrasing using only Meteor tables. Based on
 our observation, we perform the following operations on pairs of one-word paraphrases 
 from the Meteor tables:
@@ -319,50 +317,6 @@ This way we reduce more than 160 000 pairs of one word paraphrases to only 32 15
 couples of lemmas. All examples of bad one-word paraphrases from Subsection \ref{meteori} 
 are removed.
 
-\subsection{Automatic Filtering}
-Filtering strategies described in~this section are based on assigning a score to
-each paraphrase pair. We then gradually remove paraphrases with low scores and
-measure the effect on~the final correlation of~our metric.
-
-The first, straightforward approach is to use the paraphrase scores already
-provided in Meteor. They are based on~phrasal translation probabilities
-and it corresponds to~paraphrase probability in~the pivoting model.
-
-We propose an alternative scoring based on pivoting and lexical translation
-scores:
-
-$$\text{lex\_p}(\mathbf{s},\mathbf{t}) = \sum_{s \in \mathbf{s}}\sum_{t \in
-\mathbf{t}}\sum_{pivot}\text{lex}(s|pivot)\text{lex}(pivot|t)$$
-
-In this case, pivots are all words aligned to both $s$ and $t$ in the parallel
-data. To get lexical translation probabilities, we use maximum likelihood
-estimation from single best word alignment computed on CzEng 1.0
-\cite{czeng10:lrec2012}. We refer to this score as \emph{lexical
-pivoting}.
-
-We use random selection as the baseline -- paraphrases are simply shuffled and we
-then use the first 10, 20,$\ldots$ percent of them.
-
-We only evaluate the filtering techniques on the WMT12 data. First, we attempt
-to filter one-word paraphrases and use the cleaner paraphrase table in the
-\emph{one-word-only} paraphrasing strategy. Note that our paraphrase table has
-already been filtered using the error-analysis based filtering described above.
-
-\Fref{fig:filtering-lexical} shows the performance of different filtering
-techniques for one-word paraphrases. Relying on Meteor scores proves worse than
-random selection. Using lexical pivoting, we can keep a high correlation even if we
-throw away as much as 90\% of the paraphrases, however we do not improve 
-(by~a~relevant margin) upon the baseline correlation of 0.802 achieved by
-\emph{one-word-only} paraphrasing with the full paraphrase table.
-
-We evaluate the best-performing technique also in the \textit{multi-word-first}
-scenario where we use it for filtering multi-word paraphrases (see
-\Fref{fig:filtering-mwe}). As we reduce the number of paraphrases, we observe a
-considerable improvement of~correlation, however we never outperform
-\textit{one-word-only} or \textit{one-word-first}. In this case, the filtering
-simply mitigates the damage done by the multi-word paraphrases. We
-cannot hope to achieve a higher score without a~more fine-grained grip on what
-a~good multi-word paraphrase is.
 
 
 We attempt to reduce the noise in the Czech Meteor Paraphrase tables in the following way. We 
@@ -377,12 +331,13 @@ unknown word (typically a~foreign word).
 In this way we have reduced 684k paraphrases in~the original Czech Meteor Paraphrase tables 
 to~only 32k pairs of lemmas. We refer to~this table as~filtered Meteor.
 
-\section{New synthetic reference}
-In following section, we present our methods of paraphrasing reference sentence. We started
+\section{New synthetic references}
+In this section, we present our methods of paraphrasing reference sentences. We started
 with simple greedy substitution similar to \cite{kauchak}. Then we used machine translation
 systems themselves to create new references.
 
 \subsection{Simple greedy substitution}
+\label{lrec}
 We experiment with several algorithms for paraphrasing reference sentences. They differ
 in the method for selecting potential paraphrase pairs and in the choice of paraphrases.
 
@@ -970,5 +925,69 @@ single language for targeted paraphrasing.
 
 \bibliographystyle{acl}
 \bibliography{biblio}
+
+\section*{Appendix}
+\label{multiword_filtering}
+\subsection{Automatic Filtering of Meteor tables}
+Filtering strategies described in~this section are based on assigning a score to
+each paraphrase pair. We then gradually remove paraphrases with low scores and
+measure the effect on~the final correlation of~our metric.
+
+The first, straightforward approach is to use the paraphrase scores already
+provided in Meteor. They are based on~phrasal translation probabilities
+and it corresponds to~paraphrase probability in~the pivoting model.
+
+We propose an alternative scoring based on pivoting and lexical translation
+scores:
+
+$$\text{lex\_p}(\mathbf{s},\mathbf{t}) = \sum_{s \in \mathbf{s}}\sum_{t \in
+\mathbf{t}}\sum_{pivot}\text{lex}(s|pivot)\text{lex}(pivot|t)$$
+
+In this case, pivots are all words aligned to both $s$ and $t$ in the parallel
+data. To get lexical translation probabilities, we use maximum likelihood
+estimation from single best word alignment computed on CzEng 1.0
+\cite{czeng10:lrec2012}. We refer to this score as \emph{lexical
+pivoting}.
+
+We use random selection as the baseline -- paraphrases are simply shuffled and we
+then use the first 10, 20,$\ldots$ percent of them.
+
+We only evaluate the filtering techniques on the WMT12 data. First, we attempt
+to filter one-word paraphrases and use the cleaner paraphrase table in the
+\emph{one-word-only} paraphrasing strategy. Note that our paraphrase table has
+already been filtered using the error-analysis based filtering described above.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[scale=0.55]{filtering-lexical-cropped.pdf}
+\caption{Comparison of automatic filtering techniques for~\emph{one-word} paraphrases on WMT12 data.}
+\label{fig:filtering-lexical}
+\end{center}
+\end{figure}
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[scale=0.55]{filtering-mwe-cropped.pdf}
+\caption{Automatic filtering of multi-word paraphrase for~the \textit{multi-word-first} scenario on WMT12 data.}
+\label{fig:filtering-mwe}
+\end{center}
+\end{figure}
+
+
+\Fref{fig:filtering-lexical} shows the performance of different filtering
+techniques for one-word paraphrases. Relying on Meteor scores proves worse than
+random selection. Using lexical pivoting, we can keep a high correlation even if we
+throw away as much as 90\% of the paraphrases, however we do not improve 
+(by~a~relevant margin) upon the baseline correlation of 0.802 achieved by
+\emph{one-word-only} paraphrasing with the full paraphrase table.
+
+We evaluate the best-performing technique also in the \textit{multi-word-first}
+scenario where we use it for filtering multi-word paraphrases (see
+\Fref{fig:filtering-mwe}). As we reduce the number of paraphrases, we observe a
+considerable improvement of~correlation, however we never outperform
+\textit{one-word-only} or \textit{one-word-first}. In this case, the filtering
+simply mitigates the damage done by the multi-word paraphrases. We
+cannot hope to achieve a higher score without a~more fine-grained grip on what
+a~good multi-word paraphrase is.
 
 \end{document}
