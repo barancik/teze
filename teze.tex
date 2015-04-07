@@ -25,7 +25,7 @@
 \def\Sref#1{Section~\ref{#1}}
 \newcommand{\out}[1]{\textcolor[rgb]{0.8,0.8,0.8}{\textbf{#1}}}
 \newcommand{\ml}[1]{\textcolor{red}{\raisebox{.2ex}{\tiny ML:~}#1}}
-%\def\footurl#1{\footnote{\url{#1}}}
+\def\footurl#1{\footnote{\url{#1}}}
 
 %\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
 
@@ -80,9 +80,10 @@ Due to being slow and unreproducible, it is impossible to use human evaluation
 for tuning and development of MT systems. Well-performing automatic MT evaluation
 metrics are essential precisely for these tasks.
 
-The first metric correlating well with human judgment was BLEU \cite{bleu} and
-it still remains the most common metric for MT evaluation, even though other,
-better-performing metrics exist. \cite{wmt13-metrics} %sem mozna uz wmt14?
+The first metric correlating well with human judgment was BLEU \cite{bleu}.
+Due to its simplicity and language-independence, it still remains the most common 
+metric for MT evaluation, even though other, better-performing metrics exist. 
+\cite{wmt13-metrics} %sem mozna uz wmt14?
 
 BLEU is computed from the number of phrase overlaps between the translated
 % sem by se hodil asi opravdovej vzorecek misto jen zminy. nebo jen odkaz
@@ -144,6 +145,21 @@ metric itself to be tolerant to other sentence representation and the other one 
 preprocess automatically the reference sentence to new synthetic reference that is closer 
 in wording to the original reference sentence and keeps its meaning and grammatical correctness.
 
+There are MT evaluation metrics which utilize paraphrasing to improve the 
+accuracy of MT evaluation (\cite{terp}, \cite{paraeval}). Only one of them -- METEOR 
+\cite{meteor-wmt:2014} is available for the Czech language. However, its paraphrase 
+tables are so noisy that they actually harm the performance of the metric \cite{parmesan}, 
+as it can award mistranslated and even untranslated words.
+
+% madnani 2007 - Using Paraphrases for Parameter Tuning in Statistical Machine Translation 
+% podivat se radsi jeste na vsechny ty Madnani
+In \cite{madnani:2010}, targeted paraphrasing via SMT is used to improve SMT itself 
+during the parameter optimization phase of machine translation. Correct hypotheses 
+are no longer needlessly penalized due to not having similar wording to a 
+corresponding reference sentence. %\xxx{Wubben}
+
+
+
 \subsection{New synthetic references}
 Targeted paraphrasing for MT evaluation is introduced in~\newcite{kauchak}. They 
 improve the accuracy of~MT evaluation of Chinese-to-English translation by targeted 
@@ -177,7 +193,17 @@ valency frames. Changing a single word may result into not grammatical sentence.
 we do not attempt to~change a~single word in~a~reference sentence but we focus on~creating 
 one single correct reference sentence.
 
-%jeste zapojit \cite{Zhou:2006}
+TODO:
+\cite{Zhou:2006}
+ParaEval - an automatic evaluation framework, 
+- it focuses on two prominent problems associated with Bleu =lack of support for paraphrase
+matching and the absence of recall
+= large  collection of paraphrases acquired through an unsupervised process -- identfying
+phrase sets, that have the same translation in another language -- using state-of-the-art
+statistical MT word alignent and phrase extraction method
+= more stable and reliable comparison mechanism than bleu in both fluency and adequacy
+
+
 
 \subsection{Automatic Metrics}
 BLEU (and other commonly used metrics - NIST \cite{nist}, TER \cite{ter} etc.) 
@@ -253,11 +279,13 @@ their amount is~insufficient for our purposes %(see\Tref{number_of_substitutions
 %It contains 13k pairs of synonymous lemmas and 
 - only one paraphrase per four sentences on~average is found in~the data. % (see \Tref{number_of_substitutions}).  
 
-On~the other hand, Czech \textbf{Meteor Paraphrase tables} are quite the opposite of Czech WordNet -- 
-they are large in size, but contain a lot of noise as they are constructed automatically 
-from parallel data via pivoting \cite{pivoting}. 
+On~the other hand, Czech \textbf{Meteor Paraphrase tables} are quite the opposite of 
+Czech WordNet -- they are large in size, but contain a lot of noise as they wer constructed
+via \textit{pivoting}. \cite{pivoting} The pivot method is an inexpensive way of acquiring 
+paraphrases from large parallel corpora. It is based on the assumption that two phrases that 
+share a meaning may have a same translation in a foreign language. \cite{dyvik}
 
-The noise was particularly high among the multiword paraphrases -- for example: \textit{svého názoru} 
+The noise is particularly high among the multiword paraphrases -- for example: \textit{svého názoru} 
 (its opinion) and \textit{šermovat rukama a mlátit neviditelného} (to flail one's arms and to beat 
 the invisible one) are selected as a paraphrase. In \ref{multiword_filtering}, we show that the amount 
 of noise in the multi-word paraphrases is so high that no automatic filtering method we used outperforms 
@@ -715,16 +743,227 @@ However, there are many more tools for MT than for paraphrasing. Therefore, it
 seems only natural to attempt to adjust some MT tools to translate within a 
 single language for targeted paraphrasing. 
 
-\subsubsection{Phrase based Machine Translation}
+We describe this attempt on two types of MT systems -- phrase-based and rule-based. 
+Initially, we experiment with the freely available SMT system Moses.\cite{moses} We 
+create translation from Czech WordNet and the Meteor Paraphrase tables. We extended
+Moses by a new feature that makes the translation targeted. 
 
+However, the results of this method are inconclusive. In the view of errors appearing 
+in the new paraphrased sentences, we propose another solution -- targeted paraphrasing 
+using parts of a rule-based translation system included in the NLP framework Treex.
+
+\subsection{Paraphrasing using Moses}
+Moses  is a freely available statistical machine translation engine. In a nutshell, 
+statistical machine translation involves the following phases: creating language and 
+translation models, parameter tuning and decoding. We use Moses in the phrase-based 
+setting.
+
+A language model is responsible for a correct word order and grammatical correctness 
+of the translated sentence. A translation model (phrase table) supplies all possible 
+translations of a word or a phrase. Models are assigned weights which are learned 
+during the parameter tuning phase.
+
+During the decoding phase, all these models are combined to maximize 
+$ \sum_i \lambda_i \phi_i (\bar{f},\bar{e}) $, where  $ \lambda_i $ is a weight 
+of a the sub-model $ \phi_i $ and $ \bar{f},\bar{e} $ is a hypothesis and source 
+sentence, respectively. In our case, we want to make a reference sentence closer
+to a corresponding machine translation output -- $ \bar{e} $ is the reference 
+sentence and $ \bar{f} $ is a new synthetic reference.
+
+On its own, this setting could create paraphrases, but they would be just random
+paraphrases of the reference sentence -- their similarity in wording to our original 
+hypotheses would not be guaranteed. Therefore, we also add a new feature for targeted 
+paraphrasing to Moses.
+
+\subsubsection{Language model}
+We create the language model (LM) using the SRILM toolkit \cite{srilm} on the 
+data from the Czech part of the Czech-English parallel corpus CzEng \cite{czeng}. 
+
+\subsubsection{Phrase models}
+Each entry in Moses phrase tables contains a phrase, its translation, several
+feature scores (translation probability, lexical weight etc.), and optionally
+also alignment within the phrase and frequencies of phrases in the training data.
+The phrase tables are learned automatically from large parallel data.
+As we do not have any large corpora of Czech-Czech parallel data, we create the 
+following two ``fake'' translation models for paraphrasing from our paraphrase 
+tables. 
+
+\begin{itemize}
+\item \textbf{Enhanced Meteor tables}\\
+This table was created from the Czech Paraphrase Meteor tables. Each paraphrase pair 
+comes with a pivoting score which we adapt as a feature in out phrase table.  Further,
+we add our own paraphrase scores, acquired by \textit{distributional semantics}. 
+Distributional semantics assumes that two phrases are semantically similar if their 
+contextual representations are similar. \cite{miller-91}
+
+We collect all contexts (words in a window of limited size) in which Meteor paraphrases 
+occur in the Czech National Corpus \cite{SYN2010} and then measure context similarity 
+cosine distance, taking into account the number of word occurrences) for each pair of
+paraphrases. 
+
+We add six scores for each pair of paraphrases according to the size of the context window 
+used (1-3 words) and whether word order played a role in the context. 
+
+\item\textbf{One-word paraphrase table}\\
+We first create a set of all words from Czech side of CzEng appearing at least
+five times to exclude rare words and possible typos. We also add all words appearing 
+in the MT outputs and the reference sentences. Morphological analysis of the words was
+then performed using Morče. 
+
+For every word $ x $ from this set, we add to this translation table every pair of 
+words that fulfils at least on of the following requirements:
+
+\begin{itemize}
+\item $ x,x $ (not every word should be paraphrased)
+\item $ x,y $, if lemma of $ x $ is lemma of $ y $ (some word 
+might have different morphology in the paraphrased sentence)
+\item $ x,y $, if lemma of $ x $ and lemma of $ y $ are paraphrases according 
+to Czech WordNet PDT 1.9.
+\item $ x,y $, if lemma of $ x $ and lemma of $ y $ are paraphrases according 
+to the filtered Meteor.
+\end{itemize}
+
+These categories constitute the first four scores in the phrase table. A pair of 
+words gets score $ e $ if they fall in a given category, 1 ($e^0$) otherwise.
+\footnote{Phrase-table scores are considered log-probabilities.} This phrase table 
+contains more than 1,100k pairs of words.
+
+We add another score expressing POS tag similarity between the two words. It is computed 
+$ e^{\frac{1}{a+1}}$, where $ a $ is the minimal Hamming distance between tags of the
+words. This probability should reflect how morphologically distant the paraphrases are. 
+\end{itemize}
+
+\subsubsection{Feature for targeted paraphrasing}
+In order to steer the MT decoder (translation engine) in the direction of the 
+hypotheses, we implemented an additional feature for Moses which measures the 
+overlap with the hypothesis. In order to keep its computation tractable during 
+search, the overlap is defined simply as the number of words from the hypothesis 
+confirmed by the reference translation.
+
+Integration into the beam search algorithm used in phrase-based decoding
+requires us to keep track of feature state (i.e. reference words covered) to
+allow for correct hypothesis recombination. We also implemented an estimator of
+future phrase score, defined as the number of reference translation words
+covered by the given phrase. Our code is included in
+Moses.\footurl{https://github.com/moses-smt/mosesdecoder/}
+
+\subsubsection{Parameter tuning}
+We use the minimum error rate training (MERT) \cite{mert} to find the optimal 
+weights for our models. MERT asserts the weights to maximize the translation 
+quality, which is measured with BLEU. We employ the reference sentences and the 
+highest rated MT output as the parallel data for tuning. 
+
+This method, however, turned out not to be optimal for our setting. Our feature for 
+targeted paraphrasing naturally obtains the highest weight as it provides an oracle 
+guide towards the hypothesis.
+
+Other important models, e.g. the language model, get comparably very small weights. The 
+paraphrased sentences tend to be closer to the hypothesis, but not grammatically correct. 
+Therefore, we experiment with increasing the weight of the language model manually. 
+
+\subsubsection{Results}
+We compare four different basic settings, the results are presented in \Tref{settings}
+as the Pearson’s correlation coefficient of BLEU and the human judgment. 
+%A visualization of the results is shown in \Fref{visualization}. 
+The baseline
+score is not exceeded by any of our paraphrasing methods, in contrast to  our previous 
+results. 
+
+There are several reasons for the clear decrease in correlation with paraphrased 
+references. Hypotheses generated by the \textbf{Paraphrased} setting, while obtaining 
+a significantly higher BLEU score, were mostly ungrammatical and reduced the 
+correlation of our metric.
+
+The small weight of the language model seems to be the problem, but its increase brings
+even more chaos. It creates hypotheses which are nice and grammatically correct 
+but often wholly unrelated to the source sentence.
+
+This shows that our paraphrase table noise filtering was by no means sufficient and
+there is still a lot of noise in our phrase tables. Furthermore, the MT output
+might be far from being a correct sentence -- given the high weight for the targeted 
+paraphrase feature, we essentially transform the correct reference 
+sentences to incorrect hypotheses at all cost, using our noisy phrase tables.
+
+Our targeting feature is also not ideal -- it ignores word order and operates
+only on the word level (it does not model phrases). Ungrammatical translations
+with scrambled word order are considered perfectly fine so long as the
+translation contains the same words as the reference. So while the feature does
+provide a kind of oracle, it does not guarantee reaching the best possible
+translation in terms of BLEU score, let alone a grammatical translation.
+
+Another problem is illustrated by very small weights assigned to our translation
+models. In fact, the highest weight was assigned to the tag similarity feature.
+This shows that our model features (Meteor score and distributional
+similarity scores) fail to distinguish good paraphrases from the noise. 
+
+The combination of noise in the translation tables and the boosted language
+model then caused that during the decoding phase, the most common paraphrase
+according to the language model with a similar tag got the preference. 
+
+\Fref{example} represents an example of our paraphrasing method. The~hypothesis is 
+grammatically correct and has a very similar meaning as the reference sentence. The 
+new paraphrased reference is slightly closer in wording to the hypothesis, but there 
+is an error due to a bad word choice. The boosted language model reduces errors, 
+however the meaning of the sentences is shifted. In the \textbf{LM+0.4} setting, 
+they also differ a lot in wording from both the hypothesis and the reference sentence.
+
+
+\begin{table*}[ht]
+%\begin{center}
+\begin{tabular}{r|l|c|c}
+setting & reference sentence used & correlation & avg. BLEU \\
+\hline
+\textbf{Baseline} & original reference sentence, no paraphrasing & \textbf{0.75} & 12.8 \\
+\textbf{Paraphrased} & paraphrased by Moses using MERT-learned weights  & 0.50  & 15.8 \\
+\textbf{LM+0.2}  & paraphrased by Moses with LM weight increased by 0.2  & 0.24 & 9.1 \\
+\textbf{LM+0.4} & paraphrased by Moses with LM weight increased by 0.4  & 0.22 & 6.7 \\
+\end{tabular}
+\caption{Description of basic settings and the results - Pearson's correlation of BLEU and the
+human judgment, the average BLEU scores.} 
+%korelace metrik - 0.981
+\label{settings}
+%\end{center}
+\end{table*}
+\begin{figure*}[htb]
+\begin{center}
+\begin{tabular}{l|r}
+ \textbf{Source } &  \textit{Paclík claims he would dare to manage the association.} \\
+ \hline
+ 
+ \textbf{Baseline} & Paclík tvrdí , že by si na vedení asociace troufl.\\
+           & \textit{Paclík claims he would dare to lead the association.} \\
+
+ \hline
+ \textbf{Hypothesis} & Paclík tvrdí, že by se odvážil k řízení komory. \\
+            & \textit{Paclík claims he would find the courage to control the chamber.}  \\ 
+
+ \hline
+ \textbf{Paraphrased} & Paclík tvrdí, že by se na řízení organizace troufl. \\
+             & \textit{*Paclík claims he would dare to control the organization.}\\
+ \hline 
+ \textbf{LM+0.2} & Paclík tvrdí, že by si troufl na řízení ekonomiky. \\
+               &\textit{ Paclík claims he would dare to control the economy.} \\
+  
+\hline 
+ \textbf{LM+0.4} & Říká se, že Paclík si troufl na řídící rady. \\
+               & \textit{They say that Paclík ventured to governing boards.} \\
+%Lexical & Paclík tvrdí , že by se na řízení asociace troufl .\\
+%Lexical boosted by 20 & Paclík tvrdí , že by si troufl na řízení ekonomiky .\\
+%asociace, komora nikde nejsou jako parafraze
+
+\end{tabular}
+\caption{Example of the targeted paraphrasing. The~hypothesis is grammatically 
+correct and has very similar meaning as the source sentence. The new reference 
+is closer in wording to the hypothesis, but there is an error in a word choice. 
+The sentences created with increased weights of the language model are both 
+grammatically correct, but the sentence lost its original meaning.}
+\label{example}
+\end{center}
+\end{figure*}
 
 \subsection{Rule based Machine Translation}
 
-%\subsection*{Acknowledgment}
-%I would like to thank Ondřej Bojar for his helpful suggestions. This research was partially supported by 
-%the grants SVV project number 260 104 and FP7-ICT-2011-7-288487 (MosesCore). This work has been using 
-%language resources developed and/or stored and/or distributed by the LINDAT/CLARIN project of the Ministry 
-%of Education, Youth and Sports of the Czech Republic (project LM2010013).
+
 
 \bibliographystyle{acl}
 \bibliography{biblio}
