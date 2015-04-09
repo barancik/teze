@@ -36,7 +36,7 @@
   Charles University in Prague, Faculty of Mathematics and Physics\\
   Malostranské náměstí 25, Prague, Czech Republic \\
   {\tt barancikova@ufal.mff.cuni.cz} \\}
-%Hackers not welcome here!
+
 \date{}
 %
 %This paper describes Parmesan, our submission to the 2014 Workshop on Statistical Machine Translation (WMT) metrics task for evaluation English-to-Czech translation. 
@@ -54,7 +54,7 @@ translations. Using these new reference sentences makes evaluation using traditi
 metrics is more reliable as they lack of paraphrase support and have no sympathy
 for a free word order.
 
-We believe that after implementation, the system for generating new syntetic
+We believe that after implementation, the system for generating new synthetic
 references will be very beneficial not only for MT evaluation, but mainly
 inside MT systems for improved tuning and development of the systems. This way,
 it will directly influence the quality of machine translation itself.
@@ -142,8 +142,9 @@ same time it is closer in wording to the MT output.
 \section{Related Work}
 There are two attitudes towards solving the problem - one is to change the automatic
 metric itself to be tolerant to other sentence representation and the other one is to 
-preprocess automatically the reference sentence to new synthetic reference that is closer 
-in wording to the original reference sentence and keeps its meaning and grammatical correctness.
+pre-process automatically the reference sentence to new synthetic reference that is closer 
+in wording to the original reference sentence and keeps its meaning and grammatical 
+correctness.
 
 There are MT evaluation metrics which utilize paraphrasing to improve the 
 accuracy of MT evaluation (\cite{terp}, \cite{paraeval}). Only one of them -- METEOR 
@@ -157,8 +158,6 @@ In \cite{madnani:2010}, targeted paraphrasing via SMT is used to improve SMT its
 during the parameter optimization phase of machine translation. Correct hypotheses 
 are no longer needlessly penalized due to not having similar wording to a 
 corresponding reference sentence. %\xxx{Wubben}
-
-
 
 \subsection{New synthetic references}
 Targeted paraphrasing for MT evaluation is introduced in~\newcite{kauchak}. They 
