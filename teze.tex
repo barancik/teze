@@ -3,7 +3,7 @@
 \usepackage{times}
 \usepackage{url}
 \usepackage{latexsym}
-\usepackage[utf8]{inputenc}http://depling.org/depling2015/formats/depling2015latex/depling2015latex.zip
+\usepackage[utf8]{inputenc} %http://depling.org/depling2015/formats/depling2015latex/depling2015latex.zip
 \usepackage{color}
 \usepackage{xspace}
 \usepackage{url}
@@ -47,12 +47,14 @@
 
 \maketitle
 \begin{abstract}
-This thesis is concentrated on improving an accuracy of machine translation
-to Czech language using targeted paraphrasing. We develop system that creates
-new synthetic reference that are closer in wording to a corresponding machine
-translations. Using these new reference sentences makes evaluation using traditional
-metrics is more reliable as they lack of paraphrase support and have no sympathy
-for a free word order.
+This thesis is concentrated on improving an accuracy of machine translation to 
+Czech language using targeted paraphrasing. We develop system that creates new
+synthetic reference that are closer in wording to a corresponding machine 
+translations. 
+
+Using these new reference sentences makes evaluation using traditional metrics 
+is more reliable as they lack of paraphrase support and have no sympathy for a 
+free word order.
 
 We believe that after implementation, the system for generating new synthetic
 references will be very beneficial not only for MT evaluation, but mainly
@@ -63,39 +65,52 @@ it will directly influence the quality of machine translation itself.
 \end{abstract}
 
 \section{Introduction}
-Since the very first appearance of machine translation (MT) systems, a necessity
-for their objective evaluation and comparison arose. The traditional human evaluation 
-while being the most reliable has serious drawbacks -- it is time-consuming and expensive.
-.%, although there were recently successful attempts to overcome this problem using crowdsourcing techniques. [\markcite{{\it Callison-Burch}, 2009]} and [\markcite{{\it Bentivogli et al.}, 2011]} demonstrate that the average score of high number of non-expert low-paid annotators shows high agreement with gold standards provided by expert annotators in various natural language processing (NLP) tasks including machine translation evaluation.
+Since the very first appearance of machine translation (MT) systems, a 
+necessity for their objective evaluation and comparison arose. The traditional
+human evaluation while being the most reliable has serious drawbacks -- it is 
+time-consuming and expensive.
+%, although there were recently successful attempts to overcome this problem 
+%using crowdsourcing techniques. [\markcite{{\it Callison-Burch}, 2009]} and 
+%[\markcite{{\it Bentivogli et al.}, 2011]} demonstrate that the average score of 
+%high number of non-expert low-paid annotators shows high agreement with gold 
+%standards provided by expert annotators in various natural language processing 
+%(NLP) tasks including machine translation evaluation.
 
-However, the main problem of human evaluation is that it is highly dependent on the 
-person annotating and there is generally very low agreement between several human
-annotators. %footnote - example, only blah blah correlation during \cite{wmt12}.
+However, the main problem of human evaluation is that it is highly dependent on 
+the person annotating and there is generally very low agreement between several 
+human annotators. %footnote - example, only blah blah correlation during \cite{wmt12}.
 Moreover, it is practically impossible to repeat the evaluation with the same
-results (TODO: nejaka citace).
+results (TODO: nejaka citace??).
 %[Bojar - kniha] %nizka shoda pro cestinu?!! Ani ne kniha, ale spis wmt13, co 14?, 
 % kde to byla nejak hrozive nizka shoda..
 
 Due to being slow and unreproducible, it is impossible to use human evaluation
-for tuning and development of MT systems. Well-performing automatic MT evaluation
-metrics are essential precisely for these tasks.
+for tuning and development of MT systems. Well-performing automatic MT 
+evaluation metrics are essential precisely for these tasks.
 
 The first metric correlating well with human judgment was BLEU \cite{bleu}.
-Due to its simplicity and language-independence, it still remains the most common 
-metric for MT evaluation, even though other, better-performing metrics exist. 
-\cite{wmt13-metrics} %sem mozna uz wmt14?
+Due to its simplicity and language-independence, it still remains the most 
+common metric for MT evaluation, even though other, better-performing metrics 
+exist. \cite{wmt13-metrics} %sem mozna uz wmt14?
+
+%BLEU (and other commonly used metrics - NIST \cite{nist}, TER \cite{ter} etc.) 
+%disregards synonymous phrases and word form variants. One way how to  alleviate this 
+%drawback is to include paraphrases to the evaluation metric (e.g. METEOR \cite{meteor}). 
+
+%Note that the task of an MT metric is essentially one of identifying  whether the translation produced by a system is a paraphrase of the reference translation.
 
 BLEU is computed from the number of phrase overlaps between the translated
 % sem by se hodil asi opravdovej vzorecek misto jen zminy. nebo jen odkaz
 % do sekce Automatic metrics?? asi tak
-sentence (hypothesis) and the corresponding reference sentences, i.e., translations
-made by a human translator. Its main advantage is its simplicity and language independence. 
-However, the standard practice is using only one reference sentence and BLEU then tends 
-to perform badly. As there are many translations of 
-a single sentence, even a perfectly correct machine translation might get a low score 
-due different wording and disregarding synonymous expressions (see \Fref{example_of_BLEU_malfunction}). 
-This is especially valid for morphologically rich languages with free word order like 
-the Czech language. \cite{bojar-tackling-sparse-data}
+sentence (hypothesis) and the corresponding reference sentences, i.e., 
+translations made by a human translator. Its main advantage is its simplicity 
+and language independence. However, the standard practice is using only one 
+reference sentence and BLEU then tends to perform badly. As there are many 
+translations of a single sentence, even a perfectly correct machine translation 
+might get a low score due different wording and disregarding synonymous 
+expressions (see \Fref{example_of_BLEU_malfunction}). This is especially valid 
+for morphologically rich languages with free word order like the Czech 
+language. \cite{bojar-tackling-sparse-data}
 
 \begin{figure*}[htb]
 \begin{center}
@@ -133,64 +148,80 @@ to the BLEU score. There is only one unigram overlapping.}
 \label{example_of_BLEU_malfunction}
 \end{figure*}
 
-We aim to achieve higher accuracy of MT evaluation by targeted paraphrasing 
-of reference sentences, i.e. creating a new synthetic reference sentence that 
-is still correct and keeps the meaning of the original sentence, but at the 
-same time it is closer in wording to the MT output. 
+Our goal is  to achieve higher accuracy of MT evaluation by targeted 
+paraphrasing of reference sentences, i.e. creating a new synthetic reference 
+sentence that is still correct and keeps the meaning of the original sentence, 
+but at the same time it is closer in wording to the MT output. 
+
+The structure of the paper is as follows: in the next section, we present other
+work in targeted paraphrasing for MT evaluation. In \Sref{Data}, we introduced
+the data we use for our experiments.  In sections \ref{lrec} and \ref{MT}, 
+we show paraphrasing based on phrase substitutions and machine translation 
+itself. Finally, we conclude with avenues for further work.
 
 
 \section{Related Work}
-There are two attitudes towards solving the problem - one is to change the automatic
-metric itself to be tolerant to other sentence representation and the other one is to 
-pre-process automatically the reference sentence to new synthetic reference that is closer 
-in wording to the original reference sentence and keeps its meaning and grammatical 
-correctness.
+There are two attitudes towards solving the problem - one is to change the 
+automatic metric itself to be tolerant to other sentence representation and the
+other one is to pre-process automatically the reference sentence to new 
+synthetic reference that is closer in wording to the original reference 
+sentence and keeps its meaning and grammatical correctness.
 
-There are MT evaluation metrics which utilize paraphrasing to improve the 
-accuracy of MT evaluation (\cite{terp}, \cite{paraeval}). Only one of them -- METEOR 
-\cite{meteor-wmt:2014} is available for the Czech language. However, its paraphrase 
-tables are so noisy that they actually harm the performance of the metric \cite{parmesan}, 
-as it can award mistranslated and even untranslated words.
+There are several MT evaluation metrics that include paraphrase support --
+TERplus \cite{terp}, ParaEval \cite{paraeval}. All of them depend on
+their on source of paraphrases and only one of them -- METEOR 
+\cite{meteor-wmt:2014} is available for the Czech language.
+%WMT14 - Verta: WordNet, Beer: Meteor
+%mozna je zminit i trochu vic???
+
+There are several metrics that include paraphrase support, however only the 
+Meteor metric is available for Czech language too.%TODO: preformulovat
+
+%But this often awards even sentences with paraphrases that are not 
+%grammatically correct. We take a different approach by transforming a reference 
+%translation into a sentence that is closer to the MT output and keeps its 
+%original meaning and correctness.
 
 % madnani 2007 - Using Paraphrases for Parameter Tuning in Statistical Machine Translation 
 % podivat se radsi jeste na vsechny ty Madnani
-In \cite{madnani:2010}, targeted paraphrasing via SMT is used to improve SMT itself 
-during the parameter optimization phase of machine translation. Correct hypotheses 
-are no longer needlessly penalized due to not having similar wording to a 
-corresponding reference sentence. %\xxx{Wubben}
+%In \cite{madnani:2010}, targeted paraphrasing via SMT is used to improve SMT itself 
+%during the parameter optimization phase of machine translation. Correct hypotheses 
+%are no longer needlessly penalized due to not having similar wording to a 
+%corresponding reference sentence. %\xxx{Wubben}
 
 \subsection{New synthetic references}
+% Mozna tu zminit, ze tech metod parafrazovani je hromada (viz Lin a Pantel)
+% krome pri ev
+
 Targeted paraphrasing for MT evaluation is introduced in~\newcite{kauchak}. They 
-improve the accuracy of~MT evaluation of Chinese-to-English translation by targeted 
-paraphrasing.
+focus on lexical substitution in Chinese-to-English translations.  They select 
+all pairs of words for which one word appears in a reference sentence, second 
+word in a hypothesis (the MT output), but none of them in both. They keep only 
+pairs of synonymous words, i.e. words appearing in the same WordNet 
+\cite{wordnet} synset. Each such a pair of words was further contextually 
+evaluated. For every confirmed synonym, a new reference sentence is created by 
+placing it to the reference sentence on the position of its synonym.
 
-Having a hypothesis $ H = h_1,...,h_n $ and its corresponding reference translation 
-$ R =r_1, ...,r_m $, they select a~set of~candidates 
-$ C = \lbrace \langle r_i,h_j \rangle  \vert r_i \in R \setminus H, h_j \in H \setminus R \rbrace $. 
- 
-$ C $~is reduced to pairs of words appearing in~the~same WordNet synset only. For every pair 
-$  \langle r_i,h_j \rangle \in C $, $ h_j $ is evaluated in the context $ r_1,...,r_{i-1},\square,r_{i+1},...,r_m $
-and if confirmed, the new reference sentence $ r_1,...,r_{i-1},h_j,r_{i+1},...,r_m $ is created.
-This way, several reference sentences might be created, all with a single changed word with respect
-to the original one.
+%Having a hypothesis $ H = h_1,...,h_n $ and its corresponding reference translation 
+%$ R =r_1, ...,r_m $, they select a~set of~candidates 
+%$ C = \lbrace \langle r_i,h_j \rangle  \vert r_i \in R \setminus H, h_j \in H \setminus R \rbrace $. 
+% 
+%$ C $~is reduced to pairs of words appearing in~the~same WordNet synset only. For every pair 
+%$  \langle r_i,h_j \rangle \in C $, $ h_j $ is evaluated in the context $ r_1,...,r_{i-1},\square,r_{i+1},...,r_m $
+%and if confirmed, the new reference sentence $ r_1,...,r_{i-1},h_j,r_{i+1},...,r_m $ is created.
+%This way, several reference sentences might be created, all with a single changed word with respect
+%to the original one.
 
-%
-%Targeted paraphrasing for MT evaluation is introduced in~\newcite{kauchak}. They 
-%focus on lexical substitution in Chinese-to-English translations. 
-%They select all pairs of words for which one word appears in a reference sentence,
-%second word in a hypothesis (the MT output), but none of them in both. They keep 
-%only pairs of synonymous words, i.e. words appearing in the same WordNet 
-%\cite{wordnet} synset. Each such a pair of words was further contextually evaluated. 
-%For every confirmed synonym, a new reference sentence is created by placing it to the
-%reference sentence on the position of its synonym.
-%
+This solution is not quite possible to apply to the Czech language. As Czech 
+belongs among~inflective languages with rich morphology, a Czech word has 
+typically many forms and the correct form depends heavily on its context, 
+e.g., cases of nouns depend on verb valency frames. Changing a single word may 
+result into not grammatical sentence. Therefore, we do not attempt to~change 
+a~single word in~a~reference sentence but we focus on~creating one single 
+correct reference sentence.
 
-This solution is not quite possible to apply to the Czech language. As Czech belongs 
-among~inflective languages with rich morphology, a Czech word has typically many forms 
-and the correct form depends heavily on its context, e.g., cases of nouns depend on verb 
-valency frames. Changing a single word may result into not grammatical sentence. Therefore, 
-we do not attempt to~change a~single word in~a~reference sentence but we focus on~creating 
-one single correct reference sentence.
+%mimo evaluaci se take cilene parafrazovani pouziva pri tuneni
+%Madnani, Resnik: Improving Translation via Targeted Paraphrasing
 
 TODO:
 \cite{Zhou:2006}
@@ -202,141 +233,93 @@ phrase sets, that have the same translation in another language -- using state-o
 statistical MT word alignent and phrase extraction method
 = more stable and reliable comparison mechanism than bleu in both fluency and adequacy
 
-
-
 \subsection{Automatic Metrics}
-BLEU (and other commonly used metrics - NIST \cite{nist}, TER \cite{ter} etc.) 
-disregards synonymous phrases and word form variants. One way how to  alleviate this 
-drawback is to include paraphrases to the evaluation metric (e.g. METEOR \cite{meteor}). 
-
-But this often awards even sentences with paraphrases that are not grammatically correct. 
-We take a different approach by transforming a reference translation into a sentence that 
-is closer to the MT output and keeps its original meaning and correctness.
-
-There are several metrics that include paraphrase support, however only the Meteor metric
-is available for Czech language too.%TODO: preformulovat
 
 \subsubsection{Meteor}
-The Meteor metric \cite{meteor-wmt:2011} has shown high correlation with human 
-judgement since its appearance. It outperforms traditional metrics like BLEU \cite{bleu} 
-or NIST \cite{nist} as it explicitly addresses their weaknesses -- it takes into account 
-recall, distinguishes between functional and content words, allows language-specific 
+The Meteor metric outperforms traditional metrics as it explicitly addresses 
+their weaknesses -- it does not only support match on several levels -  exact, 
+stem, synonym, and paraphrase but it also takes into account recall, 
+distinguishes between functional and content words, allows language-specific 
 tuning of parameters and many others.
 
-Another important advantage of Meteor is that it supports not only exact word matches 
-between a hypothesis and its corresponding reference sentence, but also matches on the 
-level of stems, synonyms and paraphrases. The Meteor Paraphrase tables \cite{meteor-tables} 
-were created automatically using the \textit{pivot} method \cite{pivoting} for~six languages 
-(TODO: which ones).
+It came with the Meteor Paraphrase tables \cite{meteor-tables}, which were
+constructed automatically via \textit{pivoting}. \cite{pivoting} The pivot 
+method is an inexpensive way of acquiring paraphrases from large parallel 
+corpora. It is based on the assumption that two phrases that share a meaning 
+may have a same translation in a foreign language. \cite{dyvik}
 
-The basic setting of Meteor for evaluation of~Czech sentences offers two levels of matches -- 
-exact and paraphrase. Further (TODO: odkaz), we show the impact of the quality of paraphrases 
-on the performance of Meteor. We demonstrate that the Czech Meteor Paraphrase tables are full 
-of noise and their addition to the metric worsens its correlation with human judgement. 
+The basic setting of Meteor for evaluation of~Czech sentences offers two levels 
+of matches -- exact and paraphrase. As we show further (see \Sref{parmesan}), 
+its paraphrase tables are so noisy that they actually harm the performance of 
+the metric, as it can award mistranslated and even untranslated words.
 
-However, they can be very useful (after extensive filtering) in creating new reference sentences 
-by~targeted paraphrasing. 
-%This metric is basically an adaptation of~Meteor to~higher quality paraphrases.
-We show that the Czech Meteor Paraphrase tables are so noisy that they actually can harm 
-the performance of the metric. However, they can be very useful after extensive filtering 
-in targeted paraphrasing of Czech reference sentences prior to the evaluation.
-Parmesan first performs targeted paraphrasing of reference sentences, then it computes 
-the Meteor score using only the exact match on~these new reference sentences. It shows 
-significantly higher correlation with human judgment than Meteor on the WMT12 and WMT13 data. 
-%Using the reduced and modified Czech Meteor Paraphrase tables and WordNet, Parmesan first creates 
-%for every hypothesis a new reference sentence that is closer in~wording to the hypothesis, but 
-%keeps its original meaning and correctness. Then it computes the Meteor score using only the 
-%exact match on~these new reference sentences.
 
 \section{Data}
+\label{Data}
 \subsection{Text Data}
 We perform our experiments on data sets from the English-to-Czech translation 
-task of WMT12 \cite{wmt12}, WMT13 \cite{wmt13} and WMT14 \cite{wmt14}. The data 
-sets contain 13/14\footnote{We use only 12 of them because two of them (FDA.2878 
-and online-G) have no human judgments.}/10 files with Czech outputs of MT systems.
+task of WMT12 \cite{wmt12}, WMT13 \cite{wmt13} and WMT14 \cite{wmt14}. The data
+sets contain 13/14\footnote{We use only 12 of them because two of them 
+(FDA.2878 and online-G) have no human judgments.}/10 files with Czech outputs 
+of MT systems.
 
-In addition, each data set contains one file with corresponding reference sentences 
-and one with original English source sentences. We perform morphological analysis 
-and tagging of the hypotheses and the reference sentences using Morče \cite{morce:2007}.
+In addition, each data set contains one file with corresponding reference 
+sentences and one with original English source sentences. We perform 
+morphological analysis and tagging of the hypotheses and the reference 
+sentences using Morče \cite{morce:2007}.
 
-The human judgment of hypotheses is available as a relative ranking of performance of 
-five systems for~a~sentence. We calculated the score for every system by the “$ > $ others” 
-method \cite{bojar-grains}, which was the WMT12 official system score. It is computed 
-as $ \frac{wins}{wins+loses} $. We refer to this interpretation of human judgment as 
-\textit{silver standard} to distinguish it from the official system scores, which were 
-computed differently each year (here referred to as \textit{gold standard}).
+The human judgment of hypotheses is available as a relative ranking of 
+performance of five systems for~a~sentence. We calculated the score for every 
+system by the “$ > $ others” method \cite{bojar-grains}, which was the WMT12 
+official system score. It is computed as $ \frac{wins}{wins+loses} $. 
+%We refer to this interpretation of human judgment as 
+%\textit{silver standard} to distinguish it from the official system scores, which were 
+%computed differently each year (here referred to as \textit{gold standard}).
 
 \subsection{Sources of Paraphrases}
 \label{meteori}
-We make use of all existing sources of Czech paraphrases -- the Czech WordNet 1.9 PDT 
-\cite{czech-wordnet}, the Meteor Paraphrase Tables \cite{meteor-tables} and Czech PPDB %TODO: cite 
-, which recently became available.
+We make use of two existing sources of Czech paraphrases -- the Czech WordNet 
+1.9 PDT \cite{czech-wordnet}, the Meteor Paraphrase Tables \cite{meteor-tables}. 
+Czech PPDB \cite{ppdb} became available only recently and we plan to use it in 
+further research.
 
-The \textbf{Czech WordNet 1.9 PDT} is derived from the WordNet \cite{wordnet} by automatic translation 
-followed by manual verification. It~contains rather high quality lemmatized paraphrases. However 
-their amount is~insufficient for our purposes %(see\Tref{number_of_substitutions}).  
-%It contains 13k pairs of synonymous lemmas and 
-- only one paraphrase per four sentences on~average is found in~the data. % (see \Tref{number_of_substitutions}).  
+The \textbf{Czech WordNet 1.9 PDT} is derived from the WordNet \cite{wordnet} 
+by automatic translation followed by manual verification. It~contains rather 
+high quality lemmatized paraphrases. However, their amount is~insufficient for 
+our purposes - it contains only 13k pairs of synonymous lemmas. % and 
+%- only one paraphrase per four sentences on~average is found in~the data. % (see \Tref{number_of_substitutions}).  
 
-On~the other hand, Czech \textbf{Meteor Paraphrase tables} are quite the opposite of 
-Czech WordNet -- they are large in size, but contain a lot of noise as they wer constructed
-via \textit{pivoting}. \cite{pivoting} The pivot method is an inexpensive way of acquiring 
-paraphrases from large parallel corpora. It is based on the assumption that two phrases that 
-share a meaning may have a same translation in a foreign language. \cite{dyvik}
+On~the other hand, Czech \textbf{Meteor Paraphrase tables} are quite the 
+opposite of Czech WordNet -- they are large in size, but contain a lot of 
+noise. The noise is particularly high among the multiword paraphrases -- for 
+example: \textit{svého názoru} (its opinion) and \textit{šermovat rukama a 
+mlátit neviditelného} (to flail one's arms and to beat the invisible one) are 
+selected as a paraphrase. In \ref{multiword_filtering}, we show that the amount 
+of noise in the multi-word paraphrases is so high that no automatic filtering 
+method we used outperforms omitting them completely. Therefore, we used the 
+multiword paraphrases only in our first experiment (see \Sref{lrec}.
+%Mozna je teda uplne vynechat i z toho lrecovskyho experimentu
+ 
+Among one-word paraphrases the noise is sparser, but there are still pairs like 
+\textit{1873} - \textit{pijavice} (a leech) or \textit{afgh\'{a}nci} (Afghans) -
+\textit{š\v{t}astně} (happily) identified as synonyms. However, the biggest 
+problem is that most of synonymous pairs were just different word forms of the 
+same lemma. 
 
-The noise is particularly high among the multiword paraphrases -- for example: \textit{svého názoru} 
-(its opinion) and \textit{šermovat rukama a mlátit neviditelného} (to flail one's arms and to beat 
-the invisible one) are selected as a paraphrase. In \ref{multiword_filtering}, we show that the amount 
-of noise in the multi-word paraphrases is so high that no automatic filtering method we used outperforms 
-omitting them completely. Therefore, we used the multiword paraphrases only in our first experiment (see
-\Sref{lrec}.
+We performed automatically filtering among the one-word paraphrases in the 
+Meteor table in the following way. Using Morče, we first perform morphological 
+analysis of all one-word pairs and replace the word forms with their lemmas. We 
+keep only pairs of different lemmas. Further, we dispose of pairs of words that 
+differ in their parts of speech (POS)\footnote{With a single exception -- 
+paraphrases consisting of numeral and corresponding digits, e.g., 
+\textit{osmnáct} (eighteen) and \textit{18} - \textit{osmnáct} has the part of 
+speech \textit{C}, which is designated for numerals, \textit{18} is marked with 
+\textit{X} meaning it is an unknown word for the morphological analyzer.} or
+~contain an unknown (typically foreign) word.
 
-Among one-word paraphrases the noise is sparser, but there are still pairs like \textit{1873} - 
-\textit{pijavice} (a leech) or \textit{afgh\'{a}nci} (Afghans) - \textit{š\v{t}astně} (happily) 
-identified as synonyms. However, the biggest problem is that most of synonymous pairs were just 
-different word forms of the same lemma. We performed automatically filtering among the one-word
-paraphrases in the Meteor table in the following way. %, the method are described in \Sref{filtering-section}.
-
-%
-%\begin{table}[tb]
-%\begin{center}
-%\scalebox{0.97}{
-%\begin{tabular}{l|ccc}
-%& WMT12 & WMT13 & WMT14\\
-%\hline
-%WordNet            & 0.26 & 0.22 & 0.24\\
-%filtered Meteor    & 1.53 & 1.29 & 1.39\\
-%together           & 1.59 & 1.34 & 1.44\\
-%\end{tabular}}
-%\caption{Average number of one-word paraphrases per sentence found in WordNet, 
-%filtered Meteor tables and their union over all systems.}
-%\label{number_of_substitutions}
-%\end{center}
-%\end{table}
-%
-%\subsubsection{Filtering the Meteor Tables}
-%\label{filtering-section}
-%We try to remove the noise from the data with two different methods. The first
-%one is based on manual error analysis and it is applied to~one-word pairs only.
-%The second one is fully automatic and can be applied on all data, but its results 
-%are inconclusive. Therefore, we employ only the first method in the rest of our 
-%experiments.
-%
-%\subsection{Error-analysis Based Filtering}
-We manually examine sentences after paraphrasing using only Meteor tables. Based on the 
-most common error in paraphrased sentences, we perform the following operations on pairs 
-of one-word paraphrases from the Meteor tables:
-
-Using Morče, we first perform morphological analysis of all one-word pairs and replace 
-the word forms with their lemmas.  We keep only pairs of different lemmas. Further, we
-dispose of pairs of words that differ in their parts of speech (POS)\footnote{With a single 
-exception -- paraphrases consisting of numeral and corresponding digits, e.g., \textit{osmnáct} 
-(eighteen) and \textit{18} - \textit{0smnáct} has the part of speech \textit{C}, which is 
-designated for numerals, \textit{18} is marked with \textit{X} meaning it is an unknown word 
-for the morphological analyzer.} or~contain an unknown (typically foreign) word.
-
-In this way we have reduced 684k paraphrases in~the original Czech Meteor Paraphrase tables 
-to~only 32k pairs of lemmas. We refer to~this table as~\textit{filtered Meteor}.
+In this way we have reduced 684k paraphrases in~the original Czech Meteor 
+Paraphrase tables to~only 32k pairs of lemmas. We refer to~this table as
+~\textit{filtered Meteor}.
 
 \section{Simple greedy substitution}
 %tohle dat nekam na zacatek do introduction!! Tam to vsechno strucne zmini
@@ -344,45 +327,50 @@ to~only 32k pairs of lemmas. We refer to~this table as~\textit{filtered Meteor}.
 %We start with simple greedy substitution similar to \cite{kauchak}. Then we used machine 
 %translation systems themselves to create new references.
 \label{lrec}
-We experiment with several algorithms for paraphrasing reference sentences. This method is
-widely based on \cite{kauchak}. Our algorithm differ extends it with several methods for 
-selecting potential paraphrase pairs and in the choice of paraphrases.
+We experiment with several algorithms for paraphrasing reference sentences. 
+This method is widely based on \cite{kauchak}. Our algorithm differ extends it 
+with several methods for selecting potential paraphrase pairs and in the choice 
+of paraphrases.
 
 \subsection{Candidate Selection}
-We select potential paraphrases using two different methods. The first one is a simple 
-greedy search similar to~\newcite{kauchak}, the other one uses automatic word alignment 
-for selecting corresponding segments of~the reference sentence and the hypothesis.
+We select potential paraphrases using two different methods. The first one is a 
+simple greedy search similar to~\newcite{kauchak}, the other one uses automatic 
+word alignment for selecting corresponding segments of~the reference sentence 
+and the hypothesis.
 
 \begin{description}
 \item[Simple Greedy Method]
 %\subsubsection{Simple Greedy Method}
-Let $ r_1,..., r_n $,$ w_1,...,w_m $ be the hypothesis and the reference sentence, 
-respectively. We performed their tagging and extracted sets of lemmas $ W_{L} $, $ R_{L} $.  
-Then, one-word paraphrase candidates are chosen as:
+
+Let $ r_1,..., r_n $,$ w_1,...,w_m $ be the hypothesis and the reference 
+sentence, respectively. We performed their tagging and extracted sets of lemmas 
+$ W_{L} $, $ R_{L} $. Then, one-word paraphrase candidates are chosen as:
 $$ C_{L} = \lbrace (r,w) | r \in R_{L} \smallsetminus W_{L} \wedge w \in W_{L}
 \smallsetminus R_{L}  \rbrace $$
 
-Multi-words candidates $ C_M $ are selected as the Cartesian product of all sequences
-from the reference sentence and all sequences from the hypothesis. Maximum phrase length 
-is seven words, because that is the length of~the longest paraphrases in the data. Formally:
-
-\begin{gather*}
-C_{M} = \lbrace (<r_i,..,r_{i+x}>, <w_j,...,w_{j+y}>) | \: 1 \leq i \leq n-x \: \wedge \\ 
- \: 1~\leq~j \leq m-y  \: \wedge \: 0 \leq x,y \leq 6 \: \wedge \: (x \neq 0 \vee y \neq 0) \rbrace 
-\end{gather*}
+Multi-words candidates $ C_M $ are selected as the Cartesian product of all 
+sequences from the reference sentence and all sequences from the hypothesis. 
+Maximum phrase length is seven words, because that is the length of~the longest
+paraphrases in the data. % Formally:
+%
+%\begin{gather*}
+%C_{M} = \lbrace (<r_i,..,r_{i+x}>, <w_j,...,w_{j+y}>) | \: 1 \leq i \leq n-x \: \wedge \\ 
+% \: 1~\leq~j \leq m-y  \: \wedge \: 0 \leq x,y \leq 6 \: \wedge \: (x \neq 0 \vee y \neq 0) \rbrace 
+%\end{gather*}
 \item[Word and Phrase Alignments]
 %\subsubsection{Word and Phrase Alignments}
 %Due to a noisy source of our paraphrases, we experiment with adding word alignment.
-One possible way to make the algorithm more reliable is to restrict the application of 
-paraphrases to words/phrases which are aligned to each other. We compute word alignment 
-between the reference translation and MT system outputs using GIZA++ \cite{gizapp}.
+One possible way to make the algorithm more reliable is to restrict the 
+application of paraphrases to words/phrases which are aligned to each other. We 
+compute word alignment between the reference translation and MT system outputs 
+using GIZA++ \cite{gizapp}.
 
-However, if we used only our test data to create the alignment (13 x 3003 + 12 x 3000 
-= 75039 sentence pairs), the alignment quality would be insufficient. In order to make the 
-training data for word alignment larger, we take advantage of the fact that all outputs are 
-translations of the same data and also add all pairs of system outputs to our data, creating 
-over 1,000,000 \equo{artificial} sentence pairs. For example, the parallel data for WMT12 then 
-looks as follows:
+However, if we used only our test data to create the alignment (13 x 3003 + 12 
+x 3000 = 75039 sentence pairs), the alignment quality would be insufficient. In 
+order to make the training data for word alignment larger, we take advantage of 
+the fact that all outputs are translations of the same data and also add all 
+pairs of system outputs to our data, creating over 1,000,000 \equo{artificial} 
+sentence pairs. For example, the parallel data for WMT12 then looks as follows:
 
 \begin{center}
 \begin{tabular}{ll}
@@ -401,22 +389,22 @@ system 13 & reference \\
 \end{center}
 
 We also experiment with adding much larger synthetic parallel data created by
-machine translation (note that we need Czech-Czech data) but there was no impact
-on the quality of paraphrasing so we follow the outlined approach which requires
-no additional data or processing.
+machine translation (note that we need Czech-Czech data) but there was no 
+impact on the quality of paraphrasing so we follow the outlined approach which 
+requires no additional data or processing.
 
-The set of~one-word candidates $C_L$ is then simply the set of all word pairs such
-that there exists an alignment link between them. The set $C_M$ is extracted
-using phrase extraction for phrase-based MT, the standard consistency criterion
-is~applied \cite{Och99improvedalignment}.
+The set of~one-word candidates $C_L$ is then simply the set of all word pairs 
+such that there exists an alignment link between them. The set $C_M$ is 
+extracted using phrase extraction for phrase-based MT, the standard consistency 
+criterion is~applied \cite{Och99improvedalignment}.
 \end{description}
 
 \subsection{Paraphrasing}
 We reduce the set $ C_{L} $ to pairs appearing in our paraphrase tables in the 
 following way. If a word appears in several synonymous pairs we give preference 
-to those found in~WordNet or even better in the intersection of paraphrases from 
-WordNet and filtered Meteor. Similarly, we filter $ C_{M} $ to pairs also contained 
-in the multi-word Meteor tables.
+to those found in~WordNet or even better in the intersection of paraphrases 
+from WordNet and filtered Meteor. Similarly, we filter $ C_{M} $ to pairs also 
+contained in the multi-word Meteor tables.
 
 We evaluate three different paraphrasing methods which differ in the order of
 substitution.
@@ -439,32 +427,36 @@ with the \textit{One-word only} method.
 \end{description}
 
 \subsection{Depfix}
-As we substitute a word form directly from a hypothesis, it may happen that a resulting
-new reference is not grammatically correct. To rectify this, we apply Depfix \cite{depfix} 
--- an automatic post-editing system which is able to fix Czech sentences containing 
-grammatical errors.
+As we substitute a word form directly from a hypothesis, it may happen that a 
+resulting new reference is not grammatically correct. To rectify this, we apply
+Depfix \cite{depfix} -- an automatic post-editing system which is able to fix 
+Czech sentences containing grammatical errors.
 
 Depfix was originally designed for post-editing outputs of English-to-Czech 
-phrase-based machine translation. It consists of a set of~linguistically-motivated rules 
-and a statistical component that correct various kinds of errors, especially in grammar 
-(e.g. morphological agreement), using a range of natural language processing tools to 
-provide analyses of the input sentences.
+phrase-based machine translation. It consists of a set of~linguistically-motivated 
+rules and a statistical component that correct various kinds of errors, especially 
+in grammar (e.g. morphological agreement), using a range of natural language 
+processing tools to provide analyses of the input sentences.
 
-We observe that the errors that appear in the outputs of our paraphrasing algorithm are 
-often similar to some errors appearing in outputs of phrase-based machine translation systems, 
-e.g errors in morphological agreement are very common. This makes Depfix a good fit for fixing 
-the errors, since typical grammar correcting tools, such as a grammar-checker in a word processor, 
-focus on errors that are typical for humans, not for machines. 
+We observe that the errors that appear in the outputs of our paraphrasing 
+algorithm are often similar to some errors appearing in outputs of phrase-based
+machine translation systems, e.g errors in morphological agreement are very 
+common. This makes Depfix a good fit for fixing the errors, since typical 
+grammar correcting tools, such as a grammar-checker in a word processor, focus
+on errors that are typical for humans, not for machines. 
 
 \subsection{Results}
 We evaluate the method on datasets from WMT12 and WMT13.
 
 
+%Nedovoluje zmeny slovosledu
+
 \subsection{Parmesan}
-Based on the positive impact of filtering Meteor Paraphrase Tables for targeted lexical 
-paraphrasing of reference sentences %(see the column \textbf{Basic} in \Tref{results:12:13})
-, we experiment with the filtering them yet again, but this time as~an~inner part of~the 
-Meteor evaluation metric (i.e. for the paraphrase match).
+\label{parmesan}
+Based on the positive impact of filtering Meteor Paraphrase Tables for targeted
+lexical paraphrasing of reference sentences %(see the column \textbf{Basic} in \Tref{results:12:13})
+, we experiment with the filtering them yet again, but this time as~an~inner 
+part of~the Meteor evaluation metric (i.e. for the paraphrase match).
 
 \begin{table*}[htb]
 \begin{center}
@@ -487,16 +479,18 @@ setting & size & description of the paraphrase table \\
 \end{center}
 \end{table*}
 
-The filtering of~the paraphrase tables is performed analogically. We experiment with seven 
-different settings that are presented in~\Tref{meteory}. All of them are created by reducing 
-the original Meteor Paraphrase tables, except for the setting referred to~as~\textbf{WordNet} 
-in the table. In this case, the paraphrase table is generated from one-word paraphrases in 
-Czech WordNet to all their possible word forms found in~CzEng \cite{czeng}.
+The filtering of~the paraphrase tables is performed analogically. We experiment
+with seven different settings that are presented in~\Tref{meteory}. All of them
+are created by reducing the original Meteor Paraphrase tables, except for the 
+setting referred to~as~\textbf{WordNet} in the table. In this case, the 
+paraphrase table is generated from one-word paraphrases in Czech WordNet to all
+their possible word forms found in~CzEng \cite{czeng}.
 
-Prior paraphrasing reference sentences and using Meteor with the \textbf{No paraphr.} setting
-for computing scores constitutes Parmesan -- our submission to the WMT14 for evaluation 
-English-to-Czech translation. In the tables with results, Parmesan scores are highlighted by 
-the box and the best scores are in bold. % \xxx{podle lopatkovy preformulovat}
+Prior paraphrasing reference sentences and using Meteor with the \textbf{No 
+paraphr.} setting for computing scores constitutes Parmesan -- our submission
+to the WMT14 for evaluation English-to-Czech translation. In the tables with
+results, Parmesan scores are highlighted by the box and the best scores are in 
+bold. % \xxx{podle lopatkovy preformulovat}
 
 \begin{table*}[htb]
 \begin{center}
@@ -537,7 +531,7 @@ consistent. There is a clear positive impact of~the prior paraphrasing of~the re
 and of applying Depfix. The results also show that independently of~a~reference sentence used, 
 reducing the Meteor paraphrase tables in evaluation is always beneficial.
 
-We use a~freely available implementation footnote{http://www.cnts.ua.ac.be/$ \thicksim $vincent/scripts/rtest.py} 
+We use a~freely available implementation \footnote{//www.cnts.ua.ac.be/$ \thicksim $vincent/scripts/rtest.py} 
 of~\newcite{meng:1992} to determine whether the difference in~correlation 
 coefficients is statistically significant. The tests show that Parmesan performs better than
 original Meteor with 99\% certainty on the data from WMT12 and WMT13.
@@ -735,9 +729,10 @@ data. %We discuss it in \ref{vysledky}.
 
 
 \section{Paraphrasing using Phrase based Machine Translation}
+\label{MT}
 There is a close resemblance between translation and paraphrasing. They both 
-attempt to preserve the meaning of a sentence, the first one between two languages 
-and the second one within one language by different word choice. \cite{madnani:2010} 
+attempt to preserve the meaning of a sentence, the first one between 
+two languages and the second one within one language by different word choice. %\cite{madnani:2010} 
 However, there are many more tools for MT than for paraphrasing. Therefore, it 
 seems only natural to attempt to adjust some MT tools to translate within a 
 single language for targeted paraphrasing. 
@@ -751,9 +746,8 @@ However, the results of this method are inconclusive. In the view of errors appe
 in the new paraphrased sentences, we propose another solution -- targeted paraphrasing 
 using parts of a rule-based translation system included in the NLP framework Treex.
 
-
 \subsection{Paraphrasing using Moses}
-Moses  is a freely available statistical machine translation engine. In a nutshell, 
+Moses is a freely available statistical machine translation engine. In a nutshell, 
 statistical machine translation involves the following phases: creating language and 
 translation models, parameter tuning and decoding. We use Moses in the phrase-based 
 setting.
@@ -971,13 +965,13 @@ grammatically correct, but the sentence lost its original meaning.}
 \section*{Appendix}
 \label{multiword_filtering}
 \subsection*{Automatic Filtering of Meteor tables}
-Filtering strategies described in~this section are based on assigning a score to
-each paraphrase pair. We then gradually remove paraphrases with low scores and
-measure the effect on~the final correlation of~our metric.
+Filtering strategies described in~this section are based on assigning a score 
+to each paraphrase pair. We then gradually remove paraphrases with low scores 
+and measure the effect on~the final correlation of~our metric.
 
 The first, straightforward approach is to use the paraphrase scores already
-provided in Meteor. They are based on~phrasal translation probabilities
-and it corresponds to~paraphrase probability in~the pivoting model.
+provided in Meteor. They are based on~phrasal translation probabilities and it 
+corresponds to~paraphrase probability in~the pivoting model.
 
 We propose an alternative scoring based on pivoting and lexical translation
 scores:
@@ -988,21 +982,22 @@ $$\text{lex\_p}(\mathbf{s},\mathbf{t}) = \sum_{s \in \mathbf{s}}\sum_{t \in
 In this case, pivots are all words aligned to both $s$ and $t$ in the parallel
 data. To get lexical translation probabilities, we use maximum likelihood
 estimation from single best word alignment computed on CzEng 1.0
-\cite{czeng10:lrec2012}. We refer to this score as \emph{lexical
-pivoting}.
+\cite{czeng10:lrec2012}. We refer to this score as \emph{lexical pivoting}.
 
-We use random selection as the baseline -- paraphrases are simply shuffled and we
-then use the first 10, 20,$\ldots$ percent of them.
+We use random selection as the baseline -- paraphrases are simply shuffled and 
+we then use the first 10, 20,$\ldots$ percent of them.
 
 We only evaluate the filtering techniques on the WMT12 data. First, we attempt
 to filter one-word paraphrases and use the cleaner paraphrase table in the
 \emph{one-word-only} paraphrasing strategy. Note that our paraphrase table has
-already been filtered using the error-analysis based filtering described above.
+already been filtered using the error-analysis based filtering described in 
+\Sref{Data}.
 
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[scale=0.55]{filtering-lexical-cropped.pdf}
-\caption{Comparison of automatic filtering techniques for~\emph{one-word} paraphrases on WMT12 data.}
+\caption{Comparison of automatic filtering techniques for~\emph{one-word} 
+paraphrases on WMT12 data.} 
 \label{fig:filtering-lexical}
 \end{center}
 \end{figure}
@@ -1010,7 +1005,8 @@ already been filtered using the error-analysis based filtering described above.
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[scale=0.55]{filtering-mwe-cropped.pdf}
-\caption{Automatic filtering of multi-word paraphrase for~the \textit{multi-word-first} scenario on WMT12 data.}
+\caption{Automatic filtering of multi-word paraphrase for~the 
+\textit{multi-word-first} scenario on WMT12 data.}
 \label{fig:filtering-mwe}
 \end{center}
 \end{figure}
