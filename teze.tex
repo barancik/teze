@@ -91,7 +91,10 @@ evaluation metrics are essential precisely for these tasks.
 The first metric correlating well with human judgment was BLEU \cite{bleu}.
 Due to its simplicity and language-independence, it still remains the most 
 common metric for MT evaluation, even though other, better-performing metrics 
-exist. \cite{wmt13-metrics} %sem mozna uz wmt14?
+exist. \cite{wmt14} 
+
+#Evidence that BLEU correlations are not as high as previously
+thought (Callison-Burch 2006, Koehn and Monz, 2006). This is particular true at a sentence level (Blatz et al. 2003).
 
 %BLEU (and other commonly used metrics - NIST \cite{nist}, TER \cite{ter} etc.) 
 %disregards synonymous phrases and word form variants. One way how to  alleviate this 
@@ -148,6 +151,8 @@ to the BLEU score. There is only one unigram overlapping.}
 \label{example_of_BLEU_malfunction}
 \end{figure*}
 
+TODO: Note that the task of an MT metric is essentially one of identifying  whether the translation produced by a system is a paraphrase of the reference translation.!!!
+
 Our goal is  to achieve higher accuracy of MT evaluation by targeted 
 paraphrasing of reference sentences, i.e. creating a new synthetic reference 
 sentence that is still correct and keeps the meaning of the original sentence, 
@@ -161,6 +166,10 @@ itself. Finally, we conclude with avenues for further work.
 
 
 \section{Related Work}
+Using paraphrases is common for rozsirovani slovni zasoby , translating OOV words (}, improved tuning (Madnani, ...), ...
+
+In machine translation evaluation
+
 There are two attitudes towards solving the problem - one is to change the 
 automatic metric itself to be tolerant to other sentence representation and the
 other one is to pre-process automatically the reference sentence to new 
@@ -940,8 +949,66 @@ grammatically correct, but the sentence lost its original meaning.}
 \end{figure*}
 
 \subsection{Rule based Machine Translation}
+Based on previous results, Moses does not seem to be the optimal tool for our 
+task, especially unless we have at our disposal better paraphrasing tables, or
+we develop better targeting function. %TODO: lepsi tuning? 
+
+Furthermore, there may be a better solution than a phrase-based translation
+system, namely Treex \cite{treex}, a highly modular NLP software system. Treex
+was developed for TectoMT, which is a rule-based machine translation system 
+that operates on deep syntactic layer.
+
+Treex implements the stratificational approach to language, adopted from the 
+Functional Generative Description theory \cite{FGP} and its later extension by 
+the Prague Dependency Treebank \cite{PDT3.0}. It represents sentences in four 
+layers: word layer, morphological layer, shallow-syntax layer and deep-syntax 
+layer (tectogrammatical layer).
+
+Using Treex, we can easily overcome some of the problems that appear when 
+paraphrasing using Moses. First of all, we only compare two sentences and there 
+is no need to create paraphrase tables, thus less space for the noise to 
+interfere. Also there already is highly developed machinery to avoid 
+ungrammatical sentences. We can change only parts of sentences that are 
+dependent on the changed word, thus keeping the rest of the sentence correct 
+and creating more conservative sentences.
+
+We performed simple paraphrasing using Treex and started with implement the
+reordering module.
+
+\subsection{Paraphrasing}
+We transfer both hypothesis and reference sentence to the tectogrammatical 
+layer, where we extract lemmas that appear in only one of the sentences. We 
+filter those based on WordNet and filtered Meteor.
+
+Into the tectogramatical tree of a reference sentence we substituted the 
+Furthermore, we are able to transfer a reference sentence to a tectogrammatical 
+layer, where we can replace individual lemmas from the hypothesis with their 
+paraphrases and corresponding grammatemes. Then we transfer the altered reference sentence back to 
+the word layer.
+
+This way should easily overcome some of the problems that appear when paraphrasing using 
+Moses. First of all, we only compare two sentences and there is less space for %neni treba stavet tabulky
+the noise to interfere. Also there is highly developed machinery to avoid ungrammatical 
+sentences. We can change only parts of sentences that are dependent on the changed 
+word, thus keeping the rest of the sentence correct and creating more conservative 
 
 
+Pohled na možnost volby se několikrát změnil, ale neuralgický bod je stále stejný.
+Názor volebních možností změnil několikrát, ale klíčový bod zůstává stejný.
+Názor na možnost volby se změnil několikrát, ale neuralgický bod zůstává stále stejný.
+
+Jenže teď už čekat nehodlá a do dalšího života stanovila jasná pravidla.
+Nicméně nechce čekat a nastavit jasná pravidla pro svůj budoucí život.
+Jenže teď už nechce čekat a nastavila jasná pravidla do dalšího života
+
+
+\section{Future Work}
+We would like to work to enhance Treex paraphrases, next step could be multiword 
+paraphrases, better word reordering, deleting empty word (stuffing?], pekny by byly
+taky nejaky ty hierarchicke pravidla. 
+
+Ze ciste zvedavosti bych to taky chtela aplikovat na dalsi jazyky pro ktere ma treex
+analyzu a syntezu, AJ, ES...
 
 \bibliographystyle{acl}
 \bibliography{biblio}
