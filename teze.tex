@@ -98,7 +98,7 @@ evaluation metrics are essential precisely for these tasks.
 %exist. \cite{wmt14} 
 
 The first metric correlating well with human judgment was BLEU \cite{bleu}.
-BLEU is computed from an n-gram overlap between the translated sentence 
+BLEU is computed from an word sequences overlap between the translated sentence 
 (hypothesis) and one or more corresponding reference sentences, i.e., 
 translations made by a human translator.
 
@@ -195,6 +195,84 @@ other one is to pre-process automatically the reference sentence to new
 synthetic reference that is closer in wording to the original reference 
 sentence and keeps its meaning and grammatical correctness.
 
+\subsection{Automatic Metrics}
+%Second generation metrics 
+Meteor \cite{meteor-wmt:2014}, TERp \cite{terp} and ParaEval \cite{paraeval2} 
+also largely focuses on a n-gram overlap while including other linguistically 
+motivated resources. They utilize paraphrase support using their own paraphrase 
+tables, which they all had acquired automatically using the pivot-based method. 
+\cite{pivoting} 
+
+%The Meteor metric outperforms traditional metrics as it explicitly addresses 
+%their weaknesses -- it does not only support match on several levels -  exact, 
+%stem, synonym, and paraphrase but it also takes into account recall, 
+%distinguishes between functional and content words, allows language-specific 
+%tuning of parameters and many others.
+
+Meteor paraphrase table are available not only for English, but for other five 
+languages, including the Czech language. The basic setting of Meteor for 
+evaluation of~Czech sentences offers two levels of matches -- exact and 
+paraphrase. As we show further (see \Sref{parmesan}), its paraphrase tables 
+are so noisy that they actually harm the performance of the metric, as it can
+award mistranslated and even untranslated words.
+
+%WMT14 - Verta: WordNet, Beer: Meteor
+%mozna je zminit i trochu vic???
+
+%Instead of reckoning on surface level matching, other approaches concentrate on 
+%integrating rich linguistic features to model what human may perceive for 
+%translation quality [Liu and Gildea, 2005; Owczarzak et al., 2007; Popovič and 
+%Ney, 2009]. A recent work has further revealed that deeper linguistic techniques 
+%contributes to overcome the important surface differences between acceptable  MT 
+%outputs  and human references [Amigò et al., 2009]. 
+%
+%[Amigó et al., 2009] Enrique Amigó, Jesús Giménez, Julio Gonzalo, and Felisa Verdejo. 
+%The Contribution of Linguistic Features to Automatic Machine Translation Evaluation. In 
+%proceedings ACL-IJCNLP 2009 , 2009.
+%Popovič and Ney, 2009]  Syntax-oriented Evaluation Measures for Machine Translation Output. In 
+%Proceedings of WMT09 , pages, 29-32, 2009.
+%
+%Despite the positive effects in better  correlation  with  manual judgments, an obvious drawback of these approaches is that the linguistic features are language depend ent, which  prevents  the wide
+%application of such built metrics.
+%As a result, the development of automatic MT evaluation metrics falls into  a  dilemma of choosing the string level matching for wide application or selecting the linguistic-rich strategy for better performance.  Faced with an evaluation task involving multiple  languages as in WMT campaigns [Callison-Burch   et al., 2008; 2009; 2010], a language independent metric of high performance is more desirable.
+%To address this issue, this paper takes the thread of combining the string metrics for better evaluation 
+%performance at the sentence level. To compete with the linguistic approaches, the letter is suggested as a new unit of calculation for the string metrics, approximating the rich linguistic features from the persp
+%ective of finer granularity of modeling. Further, an empirical study on the feature selection is carried under the ranking SVM framework. Experiments on WMT data prove that the metric fusion  can produce a 
+%robust and high-performance metric.
+
+
+%But this often awards even sentences with paraphrases that are not 
+%grammatically correct. We take a different approach by transforming a reference 
+%translation into a sentence that is closer to the MT output and keeps its 
+%original meaning and correctness.
+
+
+\subsection{Sentence paraphrasing}
+% Mozna tu zminit, ze tech metod parafrazovani je hromada (viz Lin a Pantel)
+% krome pri ev
+Targeted paraphrasing for MT evaluation is introduced in~\newcite{kauchak}. 
+They focus on lexical substitution in Chinese-to-English translations. They 
+select all pairs of words for which one word appears in a reference sentence, 
+second 
+word in a hypothesis (the MT output), but none of them in both. They keep only 
+pairs of synonymous words, i.e. words appearing in the same WordNet 
+\cite{wordnet} synset. Each such a pair of words was further contextually 
+evaluated. For every confirmed synonym, a new reference sentence is created by 
+placing it to the reference sentence on the position of its synonym.
+
+This solution is not quite possible to apply to the Czech language. As Czech 
+belongs among~inflective languages with rich morphology, a Czech word has 
+typically many forms and the correct form depends heavily on its context, 
+e.g., cases of nouns depend on verb valency frames. Changing a single word may 
+result into not grammatical sentence. Therefore, we do not attempt to~change 
+a~single word in~a~reference sentence but we focus on~creating one single 
+correct reference sentence.
+
+%mimo evaluaci se take cilene parafrazovani pouziva pri tuneni
+%Madnani, Resnik: Improving Translation via Targeted Paraphrasing
+
+
+
 \cite{Madnani08} - second synthetic reference obtained via English-to-English 
 SMT can replace second human translation for tuninge; shows that single translation
 augmented by paraphrases can replace additional references in SMT tuning.
@@ -208,20 +286,7 @@ In machine translation evaluation
 
 
 
-There are several MT evaluation metrics that include paraphrase support --
-TERplus \cite{terp}, ParaEval \cite{paraeval}. All of them depend on
-their on source of paraphrases and only one of them -- METEOR 
-\cite{meteor-wmt:2014} is available for the Czech language.
-%WMT14 - Verta: WordNet, Beer: Meteor
-%mozna je zminit i trochu vic???
 
-There are several metrics that include paraphrase support, however only the 
-Meteor metric is available for Czech language too.%TODO: preformulovat
-
-%But this often awards even sentences with paraphrases that are not 
-%grammatically correct. We take a different approach by transforming a reference 
-%translation into a sentence that is closer to the MT output and keeps its 
-%original meaning and correctness.
 
 % madnani 2007 - Using Paraphrases for Parameter Tuning in Statistical Machine Translation 
 % podivat se radsi jeste na vsechny ty Madnani
@@ -230,73 +295,7 @@ Meteor metric is available for Czech language too.%TODO: preformulovat
 %are no longer needlessly penalized due to not having similar wording to a 
 %corresponding reference sentence. %\xxx{Wubben}
 
-\subsection{SEentence paraphrasing}
-% Mozna tu zminit, ze tech metod parafrazovani je hromada (viz Lin a Pantel)
-% krome pri ev
 
-Targeted paraphrasing for MT evaluation is introduced in~\newcite{kauchak}. They 
-focus on lexical substitution in Chinese-to-English translations.  They select 
-all pairs of words for which one word appears in a reference sentence, second 
-word in a hypothesis (the MT output), but none of them in both. They keep only 
-pairs of synonymous words, i.e. words appearing in the same WordNet 
-\cite{wordnet} synset. Each such a pair of words was further contextually 
-evaluated. For every confirmed synonym, a new reference sentence is created by 
-placing it to the reference sentence on the position of its synonym.
-
-%Having a hypothesis $ H = h_1,...,h_n $ and its corresponding reference translation 
-%$ R =r_1, ...,r_m $, they select a~set of~candidates 
-%$ C = \lbrace \langle r_i,h_j \rangle  \vert r_i \in R \setminus H, h_j \in H \setminus R \rbrace $. 
-% 
-%$ C $~is reduced to pairs of words appearing in~the~same WordNet synset only. For every pair 
-%$  \langle r_i,h_j \rangle \in C $, $ h_j $ is evaluated in the context $ r_1,...,r_{i-1},\square,r_{i+1},...,r_m $
-%and if confirmed, the new reference sentence $ r_1,...,r_{i-1},h_j,r_{i+1},...,r_m $ is created.
-%This way, several reference sentences might be created, all with a single changed word with respect
-%to the original one.
-
-This solution is not quite possible to apply to the Czech language. As Czech 
-belongs among~inflective languages with rich morphology, a Czech word has 
-typically many forms and the correct form depends heavily on its context, 
-e.g., cases of nouns depend on verb valency frames. Changing a single word may 
-result into not grammatical sentence. Therefore, we do not attempt to~change 
-a~single word in~a~reference sentence but we focus on~creating one single 
-correct reference sentence.
-
-%mimo evaluaci se take cilene parafrazovani pouziva pri tuneni
-%Madnani, Resnik: Improving Translation via Targeted Paraphrasing
-
-TODO:
-\cite{Zhou:2006}
-ParaEval - an automatic evaluation framework, 
-- it focuses on two prominent problems associated with Bleu =lack of support for paraphrase
-matching and the absence of recall
-= large  collection of paraphrases acquired through an unsupervised process -- identfying
-phrase sets, that have the same translation in another language -- using state-of-the-art
-statistical MT word alignent and phrase extraction method
-= more stable and reliable comparison mechanism than bleu in both fluency and adequacy
-
-\subsection{Automatic Metrics}
-Second generation metrics Meteor and TERp still largely focuses on a word sequence 
-overlap while including more sophisticated and linguistically motivated resources. 
-Both of them utilize stemming, WordNet and paraphrase information. Meteor
-
-
-\subsubsection{Meteor}
-The Meteor metric outperforms traditional metrics as it explicitly addresses 
-their weaknesses -- it does not only support match on several levels -  exact, 
-stem, synonym, and paraphrase but it also takes into account recall, 
-distinguishes between functional and content words, allows language-specific 
-tuning of parameters and many others.
-
-It came with the Meteor Paraphrase tables \cite{meteor-tables}, which were
-constructed automatically via \textit{pivoting}. \cite{pivoting} The pivot 
-method is an inexpensive way of acquiring paraphrases from large parallel 
-corpora. It is based on the assumption that two phrases that share a meaning 
-may have a same translation in a foreign language. \cite{dyvik}
-
-The basic setting of Meteor for evaluation of~Czech sentences offers two levels 
-of matches -- exact and paraphrase. As we show further (see \Sref{parmesan}), 
-its paraphrase tables are so noisy that they actually harm the performance of 
-the metric, as it can award mistranslated and even untranslated words.
 
 
 \section{Data}
@@ -338,7 +337,13 @@ our purposes - it contains only 13k pairs of synonymous lemmas. % and
 
 On~the other hand, Czech \textbf{Meteor Paraphrase tables} are quite the 
 opposite of Czech WordNet -- they are large in size, but contain a lot of 
-noise. The noise is particularly high among the multiword paraphrases -- for 
+noise, as they were constructed automatically via \textit{pivoting}. 
+\cite{pivoting} The pivot method is an inexpensive way of acquiring paraphrases 
+from large parallel corpora. It is based on the assumption that two phrases 
+that share a meaning may have a same translation in a foreign language. 
+\cite{dyvik}
+
+The noise is particularly high among the multiword paraphrases -- for 
 example: \textit{svého názoru} (its opinion) and \textit{šermovat rukama a 
 mlátit neviditelného} (to flail one's arms and to beat the invisible one) are 
 selected as a paraphrase. We used the multiword paraphrases only in our first 
