@@ -167,13 +167,6 @@ to the BLEU score. There is only one unigram overlapping.}
 \label{example_of_BLEU_malfunction}
 \end{figure*}
 
-TODO: Note that the task of an MT metric is essentially one of identifying  whether the translation produced by a system is a paraphrase of the reference translation.!!!
-
-%However, there is widespread recognition in  the MT community that string-based 
-%metrics are not discriminative enough to reflect the translation %quality of 
-% today’s MT systems, many of which have gone beyond pure string-based approaches
-%(cf. (Callison-Burch et al., 2006)). 
-
 As the main task of an MT metric is essentially to decide whether the reference
 sentences is a paraphrase of the MT output, our goal is to achieve higher 
 accuracy of MT evaluation by targeted paraphrasing of reference sentences., i.e. 
@@ -216,36 +209,25 @@ paraphrase. As we show further (see \Sref{parmesan}), its paraphrase tables
 are so noisy that they actually harm the performance of the metric, as it can
 award mistranslated and even untranslated words.
 
-%WMT14 - Verta: WordNet, Beer: Meteor
-%mozna je zminit i trochu vic???
+There is growing belief in the MT community that surface level matching is not
+discriminative enough to reflect the translation quality of today’s MT systems %prefomulovat, vykradeno
+and employ rich linguistic features that better reflect human perception. (e.g.
+ \newcite{liu:2005}, \newcite{owczarzak:2007}, \newcite{amigo:2009}, 
+ \newcite{Popovic:2009}, \cite{Pado09},...) 
+ 
+% \cite{Pado09} - as a translation should have the same meaning as the 
+%reference, Padó proposes metric based on textual entailment.
+ 
+These metrics shows better correlation with human judgment, but their wide 
+usage is limited by being complex and language-dependent. As a result, there is
+a trade-off between linguistic-rich strategy for better performance and 
+applicability of simple string level matching.
 
-%Instead of reckoning on surface level matching, other approaches concentrate on 
-%integrating rich linguistic features to model what human may perceive for 
-%translation quality [Liu and Gildea, 2005; Owczarzak et al., 2007; Popovič and 
-%Ney, 2009]. A recent work has further revealed that deeper linguistic techniques 
-%contributes to overcome the important surface differences between acceptable  MT 
-%outputs  and human references [Amigò et al., 2009]. 
-%
-%[Amigó et al., 2009] Enrique Amigó, Jesús Giménez, Julio Gonzalo, and Felisa Verdejo. 
-%The Contribution of Linguistic Features to Automatic Machine Translation Evaluation. In 
-%proceedings ACL-IJCNLP 2009 , 2009.
-%Popovič and Ney, 2009]  Syntax-oriented Evaluation Measures for Machine Translation Output. In 
-%Proceedings of WMT09 , pages, 29-32, 2009.
-%
-%Despite the positive effects in better  correlation  with  manual judgments, an obvious drawback of these approaches is that the linguistic features are language depend ent, which  prevents  the wide
-%application of such built metrics.
-%As a result, the development of automatic MT evaluation metrics falls into  a  dilemma of choosing the string level matching for wide application or selecting the linguistic-rich strategy for better performance.  Faced with an evaluation task involving multiple  languages as in WMT campaigns [Callison-Burch   et al., 2008; 2009; 2010], a language independent metric of high performance is more desirable.
-%To address this issue, this paper takes the thread of combining the string metrics for better evaluation 
-%performance at the sentence level. To compete with the linguistic approaches, the letter is suggested as a new unit of calculation for the string metrics, approximating the rich linguistic features from the persp
-%ective of finer granularity of modeling. Further, an empirical study on the feature selection is carried under the ranking SVM framework. Experiments on WMT data prove that the metric fusion  can produce a 
-%robust and high-performance metric.
-
-
-%But this often awards even sentences with paraphrases that are not 
-%grammatically correct. We take a different approach by transforming a reference 
-%translation into a sentence that is closer to the MT output and keeps its 
-%original meaning and correctness.
-
+%the development of automatic MT evaluation metrics falls into  a  dilemma of choosing 
+%the string level matching for wide application or selecting the linguistic-rich strategy
+%for better performance.  Faced with an evaluation task involving multiple  languages as 
+%in WMT campaigns [Callison-Burch   et al., 2008; 2009; 2010], a language independent
+% metric of high performance is more desirable.
 
 \subsection{Sentence paraphrasing}
 % Mozna tu zminit, ze tech metod parafrazovani je hromada (viz Lin a Pantel)
@@ -253,8 +235,7 @@ award mistranslated and even untranslated words.
 Targeted paraphrasing for MT evaluation is introduced in~\newcite{kauchak}. 
 They focus on lexical substitution in Chinese-to-English translations. They 
 select all pairs of words for which one word appears in a reference sentence, 
-second 
-word in a hypothesis (the MT output), but none of them in both. They keep only 
+second word in a hypothesis, but none of them in both. They keep only 
 pairs of synonymous words, i.e. words appearing in the same WordNet 
 \cite{wordnet} synset. Each such a pair of words was further contextually 
 evaluated. For every confirmed synonym, a new reference sentence is created by 
@@ -268,35 +249,15 @@ result into not grammatical sentence. Therefore, we do not attempt to~change
 a~single word in~a~reference sentence but we focus on~creating one single 
 correct reference sentence.
 
-%mimo evaluaci se take cilene parafrazovani pouziva pri tuneni
-%Madnani, Resnik: Improving Translation via Targeted Paraphrasing
-
-
-
-\cite{Madnani08} - second synthetic reference obtained via English-to-English 
-SMT can replace second human translation for tuninge; shows that single translation
-augmented by paraphrases can replace additional references in SMT tuning.
-
-\cite{Pado09} - as a translation should have the same meaning as the 
-reference, Padó proposes metric based on textual entailment.
-
-Using paraphrases is common for rozsirovani slovni zasoby , translating OOV words, improved tuning (Madnani, ...), ...
-
-In machine translation evaluation
-
-
-
-
-
-% madnani 2007 - Using Paraphrases for Parameter Tuning in Statistical Machine Translation 
-% podivat se radsi jeste na vsechny ty Madnani
-%In \cite{madnani:2010}, targeted paraphrasing via SMT is used to improve SMT itself 
-%during the parameter optimization phase of machine translation. Correct hypotheses 
-%are no longer needlessly penalized due to not having similar wording to a 
-%corresponding reference sentence. %\xxx{Wubben}
-
-
-
+There is many other application for paraphrases in the MT field. Paraphrases 
+helps translate out-of-vocabulary words and increase quality of MT systems 
+trained on sparse data \cite{Callison-Burch:2006}, \cite{Marton:2009} or 
+enlarge training data. \cite{nakov2008improved}
+\newcite{madnani2010circle} and \newcite{mehay2012shallow} show that single 
+translation augmented by targeted paraphrases can successfully replace up to
+additional 4 human reference translation.
+ 
+%\xxx{Wubben}
 
 \section{Data}
 \label{Data}
@@ -347,10 +308,10 @@ The noise is particularly high among the multiword paraphrases -- for
 example: \textit{svého názoru} (its opinion) and \textit{šermovat rukama a 
 mlátit neviditelného} (to flail one's arms and to beat the invisible one) are 
 selected as a paraphrase. We used the multiword paraphrases only in our first 
-experiment (see \Sref{lrec}). Using the substitution method paraphrasing, we 
+experiment (see \Sref{lrec}) -- using the substitution method paraphrasing, we 
 show that the amount of noise in the multi-word paraphrases is so high that no 
 automatic filtering method we used outperforms omitting them completely. (see
-Appendix - \ref{multiword_filtering})
+Appendix - \ref{multiword_filtering}) TODO: mozna uplne vynechat a odkazat jen na LRECovsky clanek??
 %Mozna je teda uplne vynechat i z toho lrecovskyho experimentu
  
 Among one-word paraphrases the noise is sparser, but there are still pairs like 
@@ -374,14 +335,10 @@ In this way we have reduced 684k paraphrases in~the original Czech Meteor
 Paraphrase tables to~only 32k pairs of lemmas. We refer to~this table as
 ~\textit{filtered Meteor}.
 
-\section{Simple greedy substitution}
-%tohle dat nekam na zacatek do introduction!! Tam to vsechno strucne zmini
-%In this and following sections, we present our methods of paraphrasing reference sentences. 
-%We start with simple greedy substitution similar to \cite{kauchak}. Then we used machine 
-%translation systems themselves to create new references.
+\section{Simple substitution paraphrasing}
 \label{lrec}
 We experiment with several algorithms for paraphrasing reference sentences. 
-This method is widely based on \cite{kauchak}. Our algorithm differ extends it 
+This method is widely based on \newcite{kauchak}. Our algorithm differ extends it 
 with several methods for selecting potential paraphrase pairs and in the choice 
 of paraphrases.
 
@@ -398,10 +355,10 @@ $ W_{L} $, $ R_{L} $. Then, one-word paraphrase candidates are chosen as:
 $$ C_{L} = \lbrace (r,w) | r \in R_{L} \smallsetminus W_{L} \wedge w \in W_{L}
 \smallsetminus R_{L}  \rbrace $$
 
-Multi-words candidates $ C_M $ are selected as the Cartesian product of all 
-sequences from the reference sentence and all sequences from the hypothesis. 
-Maximum phrase length is seven words, because that is the length of~the longest
-paraphrases in the data. % Formally:
+Multi-words candidates $ C_M $ are selected analogically from all sequences 
+of words from the reference sentence and from the hypothesis. Maximum phrase 
+length is seven words, because that is the length of~the longest paraphrases in 
+the data. % Formally:
 %
 %\begin{gather*}
 %C_{M} = \lbrace (<r_i,..,r_{i+x}>, <w_j,...,w_{j+y}>) | \: 1 \leq i \leq n-x \: \wedge \\ 
@@ -494,46 +451,53 @@ grammar correcting tools, such as a grammar-checker in a word processor, focus
 on errors that are typical for humans, not for machines. 
 
 \subsection{Results}
-Results of our method are presented in Tables \ref{corrs12} and \ref{corrs13}
-as the Pearson correlation between human judgment and BLEU computed on our new
-references. All evaluated approaches outperform the~baseline (i.e., using the 
-original reference sentences), the simplest one \textit{One-word only} performs 
+Results of our method are presented in Table \ref{corrs13} as the Pearson 
+correlation between human judgment and BLEU computed on our new references. 
+All evaluated approaches outperform the~baseline (i.e., using the original 
+reference sentences), the simplest one \textit{One-word only} performs 
 best (\Fref{example} shows an example of this method).
 
 \begin{table*}[tb]
 \begin{center}
+\scalebox{0.95}{
 \begin{tabular}{l|ccc|ccc}
+\multicolumn{7}{c}{\textbf{WMT12}}\\
+\hline
 \multirow{2}{*}{Method} & \multicolumn{3}{c|}{Greedy selection} & \multicolumn{3}{c}{Word alignment} \\
 & No Depfix & Full Depfix & Limited Depfix & No Depfix & Full Depfix & Limited Depfix\\
 \hline
 One-word only     & 0.802 & 0.827 & \textbf{0.832} & 0.792 & 0.813 & 0.810 \\
 One-word first    & 0.785 & 0.822 & 0.816 & 0.767 & 0.792 & 0.798 \\
 Multi-word first & 0.768 & 0.810 & 0.804 & 0.761 & 0.781 & 0.778 \\
-\end{tabular}
+\end{tabular}}
 
 \vspace{10pt}
 
 Baseline~correlation: \textbf{0.749}
-\caption{Correlation of the human judgment and BLEU computed with the data from WMT12}
-\label{corrs12}
-\end{center}
-\end{table*}
-
-\begin{table*}[tb]
-\begin{center}
+\vspace{10pt}
+%\caption{Correlation of the human judgment and BLEU computed with the data from WMT12}
+%\label{corrs12}
+%\end{center}
+%\end{table*}
+%
+%\begin{table*}[tb]
+%\begin{center}
+\scalebox{0.95}{
 \begin{tabular}{l|ccc|ccc}
+\multicolumn{7}{c}{\textbf{WMT13}}\\
+\hline
 \multirow{2}{*}{Method} & \multicolumn{3}{c|}{Greedy selection} & \multicolumn{3}{c}{Word alignment} \\
 & No Depfix & Full Depfix & Limited Depfix & No Depfix & Full Depfix & Limited Depfix\\
 \hline
 One-word only     & 0.861 & \textbf{0.887} & 0.883 & 0.856 & 0.877 & 0.872 \\
 One-word first    & 0.851 & 0.880 & 0.875 & 0.833 & 0.871 & 0.863 \\
 Multi-word first  & 0.838 & 0.870 & 0.864 & 0.833 & 0.868 & 0.861 \\
-\end{tabular}
+\end{tabular}}
 
 \vspace{10pt}
 
 Baseline~correlation: \textbf{0.829}
-\caption{Correlation of the human judgment and BLEU computed with the data from WMT13.}
+\caption{Correlation of the human judgment and BLEU using the simple substitution method.}
 \label{corrs13}
 \end{center}
 \end{table*}
@@ -608,7 +572,7 @@ As Table \ref{replaced} shows, the number of applied paraphrases is much lower:
 while the proportion of correct paraphrases is higher, their amount is reduced 
 too much and overall, our technique is harmed by this restriction. 
 
-\begin{table}[htb]
+\begin{table}[tb]
 \begin{center}
 \scalebox{0.85}{
 \begin{tabular}{l|cc|cc}
@@ -646,9 +610,9 @@ importance of grammatical correctness of the created references. However, the
 Results on the data from WMT13 and WMT12 are very similar. Again, paraphrasing 
 helps to increase the accuracy of the evaluation, even though the differences 
 on the WMT13 data are not as~big due to much higher baseline. This is also 
-reflected in~the smaller amount of substitutions (see \Tref{replaced13}).
+reflected in~the smaller amount of substitutions.
 
-\subsection{Parmesan}
+\subsection{Meteor without paraphrase support}
 \label{parmesan}
 Based on the positive impact of filtering Meteor Paraphrase Tables for targeted
 lexical paraphrasing of reference sentences, we experiment with the filtering 
@@ -679,15 +643,15 @@ setting & size & description of the paraphrase table \\
 The filtering of~the paraphrase tables is performed analogically. We experiment
 with seven different settings that are presented in~\Tref{meteory}. All of them
 are created by reducing the original Meteor Paraphrase tables, except for the 
-setting referred to~as~\textbf{WordNet} in the table. In this case, the 
-paraphrase table is generated from one-word paraphrases in Czech WordNet to all
-their possible word forms found in~CzEng \cite{czeng}.
-
-Prior paraphrasing reference sentences and using Meteor with the \textbf{No 
-paraphr.} setting for computing scores constitutes Parmesan -- our submission
-to the WMT14 \cite{wmt14} for evaluation English-to-Czech translation. In the 
-tables with results, Parmesan scores are highlighted by the box and the best 
-scores are in bold. % \xxx{podle lopatkovy preformulovat}
+setting referred to~as~\textbf{WordNet}. In this setting, the paraphrase table 
+is generated from one-word paraphrases in Czech WordNet to all their possible 
+word forms appearing in~CzEng \cite{czeng}.
+%
+%Prior paraphrasing reference sentences and using Meteor with the \textbf{No 
+%paraphr.} setting for computing scores constitutes Parmesan -- our submission
+%to the WMT14 \cite{wmt14} for evaluation English-to-Czech translation. In the 
+%tables with results, Parmesan scores are highlighted by the box and the best 
+%scores are in bold. % \xxx{podle lopatkovy preformulovat}
 
 \begin{table*}[htb]
 \begin{center}
@@ -699,7 +663,7 @@ reference & Basic & One-word & Same POS & Same Lemma & Diff. Lemma & No paraphr.
 \hline
 Original & 0.833 & 0.836 & 0.840 & 0.838 & 0.863 & 0.861 & 0.863 \\
 Before Depfix & 0.905 & 0.908 & 0.911 & 0.911 & 0.931 & 0.931 & 0.931 \\
-New & 0.927 & 0.930 & 0.931 & 0.932 & 0.950 & \boxed{\textbf{0.951}} & \textbf{0.951} \\
+New & 0.927 & 0.930 & 0.931 & 0.932 & 0.950 & \textbf{0.951} & \textbf{0.951} \\
 %\hline
 \end{tabular}} 
 
@@ -713,7 +677,7 @@ references & Basic & One-word & Same POS & Same Lemma & Diff. Lemma & No paraphr
 \hline
 Original & 0.817 & 0.820 & 0.823 & 0.821 & 0.850 & 0.848 & 0.850 \\
 Before Depfix  & 0.865 & 0.867 & 0.869 & 0.868 & 0.895 & 0.895 & 0.894 \\
-New  & 0.891 & 0.892 & 0.893 & 0.892 & \textbf{0.915} & \boxed{\textbf{0.915}} & \textbf{0.915} \\
+New  & 0.891 & 0.892 & 0.893 & 0.892 & \textbf{0.915} & \textbf{0.915} & \textbf{0.915} \\
 %\hline
 \end{tabular}
 }
@@ -722,16 +686,13 @@ New  & 0.891 & 0.892 & 0.893 & 0.892 & \textbf{0.915} & \boxed{\textbf{0.915}} &
 \end{center}
 \end{table*}
 
-The results of our experiments are presented in \Tref{results:12:13}. The 
-results for WMT12 and WMT13 are very consistent. There is a clear positive 
-impact of~the prior paraphrasing of~the reference sentences and of applying 
-Depfix. The results also show that independently of~a~reference sentence used, 
-reducing the Meteor paraphrase tables in evaluation is always beneficial.
+The results of our experiments are presented in \Tref{results:12:13}, they are 
+very consistent for WMT12 and WMT13. We show that independently of~a~reference 
+sentence used, reducing the Meteor paraphrase tables in evaluation is always 
+beneficial.
 
-%We use a~freely available implementation \footnote{//www.cnts.ua.ac.be/$ \thicksim $vincent/scripts/rtest.py} 
-%of~\newcite{meng:1992} to determine whether the difference in~correlation 
-%coefficients is statistically significant. The tests show that Parmesan performs better than
-%original Meteor with 99\% certainty on the data from WMT12 and WMT13.
+Tests show that prior paraphrasing references and Meteor without paraphrase
+support significantly outperform the original Meteor on our data.
 
 \textbf{Diff. Lemma} and \textbf{WordNet} settings give the best results on the 
 original reference sentences. That is because they are basically a limited 
@@ -749,9 +710,9 @@ Czech word is the correct translation of the English side.}, \textit{vůdce} -
 \textit{peninsula}. For these reasons, the differences among the systems are 
 more blurred and the metric performs worse than without using the paraphrases. 
 
-\section{Paraphrasing using Phrase based Machine Translation}
+\section{Paraphrasing using Machine Translation}
 \label{MT}
-While this simple method offers good result, it is very limited. We would like
+While the previous method offers good result, it is very limited. We would like
 to be able to use longer paraphrases, word order changes, switch between active 
 and pasive construction, etc.
 
