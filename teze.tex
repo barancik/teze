@@ -29,7 +29,7 @@
 
 %\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
 
-\title{Parmesan: Meteor without Paraphrases with Paraphrased References}
+\title{Targeted Paraphrasing for Machine Translation Evaluation}
 
 \author{Petra Barančíková \\
   Institute of Formal and Applied Linguistics \\
@@ -53,8 +53,7 @@ synthetic reference that are closer in wording to a corresponding machine
 translations. 
 
 Using these new reference sentences makes evaluation using traditional metrics 
-is more reliable as they lack of paraphrase support and have no sympathy for a 
-free word order.
+is more reliable as they lack of paraphrase and free word order support.
 
 We believe that after implementation, the system for generating new synthetic
 references will be very beneficial not only for MT evaluation, but mainly
@@ -97,7 +96,7 @@ evaluation metrics are essential precisely for these tasks.
 %common metric for MT evaluation, even though other, better-performing metrics 
 %exist. \cite{wmt14} 
 
-The first metric correlating well with human judgment was BLEU \cite{bleu}.
+The first metric correlating well with human judgment was BLEU. \cite{bleu}
 BLEU is computed from an word sequences overlap between the translated sentence 
 (hypothesis) and one or more corresponding reference sentences, i.e., 
 translations made by a human translator.
@@ -131,7 +130,7 @@ rich languages with free word order like the Czech language.
 \cite{bojar-tackling-sparse-data}
 
 
-\begin{figure*}[htb]
+\begin{figure*}[tb]
 \begin{center}
 \begin{tabular}{ll}
  Original sentence &  \begin{tabular}{l}
@@ -307,11 +306,10 @@ that share a meaning may have a same translation in a foreign language.
 The noise is particularly high among the multiword paraphrases -- for 
 example: \textit{svého názoru} (its opinion) and \textit{šermovat rukama a 
 mlátit neviditelného} (to flail one's arms and to beat the invisible one) are 
-selected as a paraphrase. We used the multiword paraphrases only in our first 
-experiment (see \Sref{lrec}) -- using the substitution method paraphrasing, we 
-show that the amount of noise in the multi-word paraphrases is so high that no 
-automatic filtering method we used outperforms omitting them completely. (see
-Appendix - \ref{multiword_filtering}) TODO: mozna uplne vynechat a odkazat jen na LRECovsky clanek??
+selected as a paraphrase. We show that the amount of noise in the multi-word 
+paraphrases is so high that no automatic filtering method we used outperforms 
+omitting them completely. (see Appendix - \ref{multiword_filtering}) 
+TODO: mozna uplne vynechat a odkazat jen na LRECovsky clanek??
 %Mozna je teda uplne vynechat i z toho lrecovskyho experimentu
  
 Among one-word paraphrases the noise is sparser, but there are still pairs like 
@@ -619,7 +617,7 @@ lexical paraphrasing of reference sentences, we experiment with the filtering
 them yet again, but this time as~an~inner part of~the Meteor evaluation metric 
 (i.e. for the paraphrase match).
 
-\begin{table*}[htb]
+\begin{table*}[tb]
 \begin{center}
 
 \scalebox{0.99}{
@@ -653,7 +651,7 @@ word forms appearing in~CzEng \cite{czeng}.
 %tables with results, Parmesan scores are highlighted by the box and the best 
 %scores are in bold. % \xxx{podle lopatkovy preformulovat}
 
-\begin{table*}[htb]
+\begin{table*}[tb]
 \begin{center}
 \scalebox{0.95}{
 \begin{tabular}{l|ccccccc}
@@ -716,25 +714,23 @@ While the previous method offers good result, it is very limited. We would like
 to be able to use longer paraphrases, word order changes, switch between active 
 and pasive construction, etc.
 
-For this purpose, we employ machine translation itself as there is a close 
-resemblance between translation and paraphrasing. They both attempt to preserve 
-the meaning of a sentence, the first one between two languages and the second 
-one within one language by different word choice. %\cite{madnani:2010} 
-
-However, there are many more tools for MT than for paraphrasing. Therefore, it 
-seems only natural to attempt to adjust some MT tools to translate within a 
+For this purpose, we employ machine translation itself -- there are many tools 
+for MT and there is close resemblance between translation and paraphrasing. 
+They both attempt to preserve the meaning of a sentence, the first one between 
+two languages and the second one within one language by different word choice. 
+It seems only natural to attempt to adjust some MT tools to translate within a 
 single language for targeted paraphrasing. 
 
 We describe this attempt on two types of MT systems -- phrase-based and 
 rule-based. Initially, we experiment with the freely available SMT system 
-Moses.\cite{moses} We create translation from Czech WordNet and the Meteor 
+Moses. \cite{moses} We create translation from Czech WordNet and the Meteor 
 Paraphrase tables. We extended Moses by a new feature that makes the 
 translation targeted. 
 
 However, the results of this method are inconclusive. In the view of errors 
 appearing in the new paraphrased sentences, we propose another solution -- 
-targeted paraphrasing using parts of a rule-based translation system included 
-in the NLP framework Treex.
+targeted paraphrasing using a rule-based translation system included in the NLP 
+framework Treex. \cite{treex}
 
 \subsection{Paraphrasing using Moses}
 Moses is a freely available statistical machine translation engine. In a 
@@ -755,15 +751,15 @@ sentence closer to a corresponding machine translation output -- $ \bar{e} $ is
 the reference sentence and $ \bar{f} $ is a new synthetic reference.
 
 On its own, this setting could create paraphrases, but they would be just 
-random paraphrases of the reference sentence -- their similarity in wording to 
-our original hypotheses would not be guaranteed. Therefore, we also add a new 
+random paraphrases of the reference sentence -- their similarity to our 
+original hypotheses would not be guaranteed. Therefore, we also add a new 
 feature for targeted paraphrasing to Moses.
 
 \subsubsection{Language model}
 We create the language model (LM) using the SRILM toolkit \cite{srilm} on the 
 data from the Czech part of the Czech-English parallel corpus CzEng. 
 
-\subsubsection{Phrase models}
+\subsubsection{Translation models}
 Each entry in Moses phrase tables contains a phrase, its translation, several
 feature scores (translation probability, lexical weight etc.), and optionally
 also alignment within the phrase and frequencies of phrases in the training 
@@ -772,14 +768,13 @@ As we do not have any large corpora of Czech-Czech parallel data, we create the
 following two ``fake'' translation models for paraphrasing from our paraphrase 
 tables. 
 
-\begin{itemize}
-\item \textbf{Enhanced Meteor tables}\\
+\subsubsection*{Enhanced Meteor tables}
 This table was created from the Czech Paraphrase Meteor tables. Each paraphrase 
 pair comes with a pivoting score which we adapt as a feature in out phrase 
 table. Further, we add our own paraphrase scores, acquired by 
 \textit{distributional semantics}. Distributional semantics assumes that two 
 phrases are semantically similar if their contextual representations are 
-similar. \cite{miller}
+similar. \cite{miller-91}
 
 We collect all contexts (words in a window of limited size) in which Meteor 
 paraphrases occur in the Czech National Corpus \cite{SYN2010} and then measure 
@@ -790,7 +785,7 @@ We add six scores for each pair of paraphrases according to the size of the
 context window used (1-3 words) and whether word order played a role in the 
 context. 
 
-\item\textbf{One-word paraphrase table}\\
+\subsubsection*{One-word paraphrase table}
 We first create a set of all words from Czech side of CzEng appearing at 
 least five times to exclude rare words and possible typos. We also add all 
 words appearing in the MT outputs and the reference sentences. Morphological 
@@ -818,11 +813,10 @@ We add another score expressing POS tag similarity between the two words. It is
 computed $ e^{\frac{1}{a+1}}$, where $ a $ is the minimal Hamming distance 
 between tags of the words. This probability should reflect how morphologically 
 distant the paraphrases are. 
-\end{itemize}
 
 \subsubsection{Feature for targeted paraphrasing}
 In order to steer the MT decoder (translation engine) in the direction of the 
-hypotheses, we implemented an additional feature for Moses which measures the 
+hypotheses, we implemented to Moses an additional feature, which measures the 
 overlap with the hypothesis. In order to keep its computation tractable during 
 search, the overlap is defined simply as the number of words from the 
 hypothesis confirmed by the reference translation.
@@ -835,28 +829,8 @@ covered by the given phrase. Our code is included in
 Moses.\footurl{https://github.com/moses-smt/mosesdecoder/}
 
 \subsubsection{Parameter tuning}
-We use the minimum error rate training (MERT) \cite{mert} to find the optimal 
-weights for our models. MERT asserts the weights to maximize the translation 
-quality, which is measured with BLEU. We employ the reference sentences and the 
-highest rated MT output as the parallel data for tuning. 
 
-This method, however, turned out not to be optimal for our setting. Our feature 
-for targeted paraphrasing naturally obtains the highest weight as it provides 
-an oracle guide towards the hypothesis.
-
-Other important models, e.g. the language model, get comparably very small 
-weights. The paraphrased sentences tend to be closer to the hypothesis, but not 
-grammatically correct. Therefore, we experiment with increasing the weight of 
-the language model manually. 
-
-\subsubsection{Results}
-We compare four different basic settings, the results are presented in 
-\Tref{settings} as the Pearson’s correlation coefficient of BLEU and the human 
-judgment. In contrast to  our previous results, the baseline score is not 
-exceeded by any of our paraphrasing methods.
-%A visualization of the results is shown in \Fref{visualization}. 
-
-\begin{table*}[ht]
+\begin{table*}[tb]
 %\begin{center}
 \begin{tabular}{r|l|c|c}
 setting & reference sentence used & correlation & avg. BLEU \\
@@ -873,47 +847,8 @@ human judgment, the average BLEU scores.}
 %\end{center}
 \end{table*}
 
-There are several reasons for the clear decrease in correlation with 
-paraphrased references. Hypotheses generated by the \textbf{Paraphrased} 
-setting, while obtaining a significantly higher BLEU score, were mostly 
-ungrammatical and reduced the correlation of our metric.
 
-The small weight of the language model seems to be the problem, but its 
-increase brings even more chaos. It creates hypotheses which are nice and 
-grammatically correct but often wholly unrelated to the source sentence.
-
-This shows that our paraphrase table noise filtering was by no means sufficient 
-and there is still a lot of noise in our phrase tables. Furthermore, the MT 
-output might be far from being a correct sentence -- given the high weight for 
-the targeted paraphrase feature, we essentially transform the correct reference 
-sentences to incorrect hypotheses at all cost, using our noisy phrase tables.
-
-Our targeting feature is also not ideal -- it ignores word order and operates
-only on the word level (it does not model phrases). Ungrammatical translations
-with scrambled word order are considered perfectly fine so long as the
-translation contains the same words as the reference. So while the feature does
-provide a kind of oracle, it does not guarantee reaching the best possible
-translation in terms of BLEU score, let alone a grammatical translation.
-
-Another problem is illustrated by very small weights assigned to our 
-translation models. In fact, the highest weight was assigned to the tag 
-similarity feature. This shows that our model features (Meteor score and 
-distributional similarity scores) fail to distinguish good paraphrases from the 
-noise. 
-
-The combination of noise in the translation tables and the boosted language
-model then caused that during the decoding phase, the most common paraphrase
-according to the language model with a similar tag got the preference. 
-
-\Fref{example} represents an example of our paraphrasing method. The~hypothesis 
-is grammatically correct and has a very similar meaning as the reference 
-sentence. The new paraphrased reference is slightly closer in wording to the 
-hypothesis, but there is an error due to a bad word choice. The boosted 
-language model reduces errors, however the meaning of the sentences is shifted. 
-In the \textbf{LM+0.4} setting, they also differ a lot in wording from both the 
-hypothesis and the reference sentence.
-
-\begin{figure*}[htb]
+\begin{figure*}[tb]
 \begin{center}
 \begin{tabular}{l|r}
  \textbf{Source } &  \textit{Paclík claims he would dare to manage the association.} \\
@@ -946,9 +881,70 @@ correct and has very similar meaning as the source sentence. The new reference
 is closer in wording to the hypothesis, but there is an error in a word choice. 
 The sentences created with increased weights of the language model are both 
 grammatically correct, but the sentence lost its original meaning.}
-\label{example}
+\label{example:Moses}
 \end{center}
 \end{figure*}
+
+We use the minimum error rate training (MERT) \cite{mert} to find the optimal 
+weights for our models. MERT asserts the weights to maximize the translation 
+quality, which is measured with BLEU. We employ the reference sentences and the 
+highest rated MT output as the parallel data for tuning. 
+
+This method, however, turned out not to be optimal for our setting. Our feature 
+for targeted paraphrasing naturally obtains the highest weight as it provides 
+an oracle guide towards the hypothesis.
+
+Other important models, e.g. the language model, get comparably very small 
+weights. The paraphrased sentences tend to be closer to the hypothesis, but not 
+grammatically correct. Therefore, we experiment with increasing the weight of 
+the language model manually. 
+
+\subsubsection{Results}
+We compare four different basic settings, the results are presented in 
+\Tref{settings} as the Pearson’s correlation coefficient of BLEU and the human 
+judgment. In contrast to  our previous results, the baseline score is not 
+exceeded by any of our paraphrasing methods.
+%A visualization of the results is shown in \Fref{visualization}. 
+
+There are several reasons for the clear decrease in correlation with 
+paraphrased references. Hypotheses generated by the \textbf{Paraphrased} 
+setting, while obtaining a significantly higher BLEU score, were mostly 
+ungrammatical and reduced the correlation of our metric.
+
+The small weight of the language model seems to be the problem, but its 
+increase brings even more chaos. It creates hypotheses which are nice and 
+grammatically correct but often wholly unrelated to the source sentence.
+
+This shows that our paraphrase table noise filtering was by no means sufficient 
+and there is a lot of noise in our phrase tables. Furthermore, the MT output 
+might be far from being a correct sentence -- given the high weight for the 
+targeted paraphrase feature, we essentially transform the correct reference 
+sentences to incorrect hypotheses at all cost, using our noisy phrase tables.
+
+Our targeting feature is also not ideal -- it ignores word order and operates
+only on the word level (it does not model phrases). Ungrammatical translations
+with scrambled word order are considered perfectly fine so long as the
+translation contains the same words as the reference. So while the feature does
+provide a kind of oracle, it does not guarantee reaching the best possible
+translation in terms of BLEU score, let alone a grammatical translation.
+
+Another problem is illustrated by very small weights assigned to our 
+translation models. In fact, the highest weight was assigned to the tag 
+similarity feature. This shows that our model features (Meteor score and 
+distributional similarity scores) fail to distinguish good paraphrases from the 
+noise. 
+
+The combination of noise in the translation tables and the boosted language
+model then caused that during the decoding phase, the most common paraphrase
+according to the language model with a similar tag got the preference. 
+
+\Fref{example:Moses} represents an example of our paraphrasing method. The~hypothesis 
+is grammatically correct and has a very similar meaning as the reference 
+sentence. The new paraphrased reference is slightly closer in wording to the 
+hypothesis, but there is an error due to a bad word choice. The boosted 
+language model reduces errors, however the meaning of the sentences is shifted. 
+In the \textbf{LM+0.4} setting, they also differ a lot in wording from both the 
+hypothesis and the reference sentence.
 
 \subsection{Rule based Machine Translation}
 Based on previous results, Moses does not seem to be the optimal tool for our 
@@ -956,65 +952,225 @@ task, especially unless we have at our disposal better paraphrasing tables, or
 we develop better targeting function. %TODO: lepsi tuning? 
 
 Furthermore, there may be a better solution than a phrase-based translation
-system, namely Treex \cite{treex}, a highly modular NLP software system. Treex
-was developed for TectoMT, which is a rule-based machine translation system 
-that operates on deep syntactic layer.
+system -- namely a highly modular NLP software system Treex, developed for 
+TectoMT, a rule-based machine translation system that operates on a deep 
+syntactic layer.
 
 Treex implements the stratificational approach to language, adopted from the 
 Functional Generative Description theory \cite{FGP} and its later extension by 
 the Prague Dependency Treebank \cite{PDT3.0}. It represents sentences in four 
-layers: word layer, morphological layer, shallow-syntax layer and deep-syntax 
-layer (tectogrammatical layer).
+layers: word layer (w-layer), morphological layer (m-layer), 
+shallow-syntax/analytical layer (a-layer) and deep-syntax/tectogrammatical 
+layer (t-layer).
 
-Using Treex, we can easily overcome some of the problems that appear when 
-paraphrasing using Moses. First of all, we only compare two sentences and there 
-is no need to create paraphrase tables, thus less space for the noise to 
-interfere. Also there already is highly developed machinery to avoid 
-ungrammatical sentences. We can change only parts of sentences that are 
-dependent on the changed word, thus keeping the rest of the sentence correct 
-and creating more conservative sentences.
+In TectoMT, a sentence in a source language is analyses from w-layer to 
+t-layer, transferred to a second language t-layer, and a translation is 
+generated from t-layer to a-layer.
 
-We performed simple paraphrasing using Treex and started with implement the
-reordering module.
+%Treex is opensource and is available on github (link), including the two
+%blocks that we contributed (link, link), as well as the scripts to run our method
+%(link). The following text describes the implementation of our approach, and
+%corresponds to a Treex scenario (link).
 
-\subsection{Paraphrasing}
-We transfer both hypothesis and reference sentence to the tectogrammatical 
-layer, where we extract lemmas that appear in only one of the sentences. We 
-filter those based on WordNet and filtered Meteor.
+Using Treex, we can easily overcome some of the problems of paraphrasing using 
+Moses. First of all, we can only compare two sentences and there is no need to 
+create paraphrase tables, thus less space for the noise to interfere. Also 
+there already is highly developed machinery to avoid ungrammatical sentences. 
+We can change only parts of sentences that are dependent on the changed word, 
+thus keeping the rest of the sentence correct and creating more conservative 
+references.
+%
+%We performed simple paraphrasing using Treex and started with implement the
+%reordering module.
+\subsection{Paraphrasing using Treex}
+The analysis and generation pipeline is taken from the TectoTM system. In our 
+setting, we transfer both hypothesis and reference sentence to the t-layer, 
+where we replace the transfer phase with module for t-lemma paraphrasing. 
+After paraphrasing we perform synthesis to a-layer, where we plug a reordering 
+module a continue with synthesis to the w-layer. 
 
-Into the tectogramatical tree of a reference sentence we substituted the 
-Furthermore, we are able to transfer a reference sentence to a tectogrammatical 
-layer, where we can replace individual lemmas from the hypothesis with their 
-paraphrases and corresponding grammatemes. Then we transfer the altered 
-reference sentence back to the word layer.
+\subsubsection{Analysis}
+The analysis from w-layer to a-layer includes tokenization, POS-tagging and 
+lemmatization using MorphoDiTa \cite{morphodita}, dependency parsing using the 
+MSTParser \cite{McDonald:2005} adapted by \newcite{Novak:2007}, trained on PDT.
 
-This way should easily overcome some of the problems that appear when paraphrasing using 
-Moses. First of all, we only compare two sentences and there is less space for %neni treba stavet tabulky
-the noise to interfere. Also there is highly developed machinery to avoid ungrammatical 
-sentences. We can change only parts of sentences that are dependent on the changed 
-word, thus keeping the rest of the sentence correct and creating more conservative 
+Surface-syntax a-tree is then converted into deep-syntax t-tree. Auxiliary 
+words are removed, with their function now represented using t-node attributes 
+(grammatemes and formemes) of autosemantic words that they belong to (e.g. two
+a-nodes of the verb form “has been played” would be collapsed into one t-node
+“play”, with the tense grammateme set to past and the diathesis grammateme
+set to passive; “in May” would be collapsed into “May” with formeme in+X).
+
+Morphological features are converted into grammatemes as well. The t-nodes
+thus consist of a t-lemma and a set of attributes (a formeme and a set of 
+grammatemes); however, the surface form of the words is not represented on 
+t-layer.
+
+\subsubsection{Paraphrasing}
+The paraphrasing block T2T::ParaphraseSimple is freely available at GitHub (TODO: url). 
+If no translation t-node bears the t-lemma A of the reference t-node R, and
+if there exists a t-lemma B that is a paraphrase of the t-lemma A according
+to WordNet or filtered Meteor, and there is a translation node T which bears 
+the t-lemma B, and no t-node of the reference bears the t-lemma B, then the 
+t-lemma of the reference t-node R is changed from A to B.
+
+The other attributes of the t-node are kept unchanged based on the theory that
+semantic properties are independent of the t-lemma. However, in practice, there 
+is at least one case where this is not true: t-nodes corresponding to nouns are 
+marked for grammatical gender, which is very often a grammatical property of 
+the given lemma with no effect on the meaning (for example, “a house” can be 
+translated either as a masculine noun “d\o{u}m” or as feminine noun “budova”),
+%; we really believe this should be marked on the lemma only, but this is not the case in Treex. 
+Therefore, when paraphrasing a t-node that corresponds to a noun, we delete 
+the value of the gender grammateme, and let the subsequent synthesis pipeline 
+generate the correct value of the morphological gender feature value (which is 
+necessary to ensure correct morphological agreement with surrounding words, 
+such as adjectives and verbs).
+
+\subsubsection{Synthesis from t-layer to a-layer}
+In this phase, a-nodes corresponding to auxiliary words and punctuation are 
+generated, morphological feature values on a-nodes are initialized and set to 
+enforce morphological agreement among the nodes. Correct word forms based 
+on lemma and POS, and morphological features are generated using MorphoDiTa.
+
+\subsubsection{Tree-based reordering}
+The reordering block A2A::ReorderByLemmas is freely available at GitHub (TODO: url).
+
+The idea behind the block is to make the word order of the new reference as 
+similar to the word order of the translation, but with some tree-based 
+constraints to avoid ungrammatical sentences. The general approach is to 
+reorder the subtrees rooted at modifier nodes of a given head node so that they 
+follow in an order that is on average similar to their order in the translation.
+
+%As the ultimate MT quality metric we apply to compare the translation and
+%the reference is word based, we align translation and reference words that have
+%an identical lemma. Reordering reference words with a lemma that does not
+%appear in the translation has little effect on the resulting score given by the
+%metric, we thus treat those as unaligned words. For simplicity, we also treat
+%repeated words as unaligned, as it is not straightforward to decide which of the
+%possible alignments to use; however, repeated words are rather rare. 
+%TODO future work – align more words.
+%Our reordering proceeds in several steps.
+
+Each a-node has order, i.e. position in the sentence. % (the a-nodes are number
+%by numbers from 1 to N where N is the number of tokens in the sentence).
+First, we define the \textit{MT order} of each reference a-node as the order of its
+corresponding translation a-node, i.e. a node with the same lemma. We define
+the MT order only if there is exactly one a-node with the given lemma in the
+translation and exactly one in the reference; thus, the MT order is undefined
+for some nodes.
+
+Next, we compute the subtree MT order of each reference a-node R as the
+average MT order of all a-nodes in the subtree rooted at the a-node R (including
+the MT order of R itself). Only nodes with a defined MT order are taken into
+account; thus, also the subtree MT order is undefined for some nodes. The
+calculation of subtree MT order is performed recursively and is thus efficient.
+Then, we iterate over all a-nodes, and for each a-node with at least one
+dependent node, we reorder the sequence S of the head a-node H and its de-
+pendent a-nodes D i . For each of the nodes (H, D i ), we define its sorting order.
+The sorting order of H is defined as its MT order The sorting order of each
+dependent node D i is defined as its subtree MT order.
+If for a node its sorting order is undefined, it is set to the sorting order of
+the node that precedes it in the sequence S, thus favouring neighbouring nodes
+(or subtrees) to be reordered together in case there is no evidence that they
+should be brought apart from each other. If the node is first in the sequence S,
+its sorting order is defined as 0.
+Additionally, a 1/1000th of the original order of the node is added to its
+sorting order (for each D i as well as for H); this is to break ties in such a way
+that the original ordering of the nodes is preferred to reordering them.
+And finally, the sequence of the nodes is reordered according to their sorting
+order. If a node is a root of a subtree, the whole subtree is moved and its
+internal ordering is kept; unless it is the H node, which, obviously, is always
+moved alone, without its dependents.
+We do not handle non-projective edges in any special way, so they always
+get projectivized if they take part in a reordering process, or kept if they do
+not. However, no new non-projective edges are created in the process – this is
+ensured by always moving the subtrees at once.
+Please note that each node can take part in at most two reorderings – once
+as the H node and once as a D i node. Moreover, the nodes can be processed in
+any order, as a reordering does not influence any other reordering.
 
 
-Pohled na možnost volby se několikrát změnil, ale neuralgický bod je stále stejný.
-Názor volebních možností změnil několikrát, ale klíčový bod zůstává stejný.
-Názor na možnost volby se změnil několikrát, ale neuralgický bod zůstává stále stejný.
+%Example:
+%Ref: Jenže teď už čekat nehodlá a do dalšího života stanovila jasná pravidla.
+%MT: Nicméně nechce čekat a nastavit jasná pravidla pro svůj budoucí život.
+%NO_reordering: Jenže teď už nechce čekat a do dalšího života stanovila jasná pravidla.
+%RES:Jenže teď už nechce čekat a nastavila jasná pravidla do dalšího života.
 
-Jenže teď už čekat nehodlá a do dalšího života stanovila jasná pravidla.
-Nicméně nechce čekat a nastavit jasná pravidla pro svůj budoucí život.
-Jenže teď už nechce čekat a nastavila jasná pravidla do dalšího života
+\begin{figure*}[tb]
+\begin{center}
+\scalebox{0.95}{
+\begin{tabular}{l|r}
+ \textbf{Source}  &  \textit{However, she does not want to wait any longer, and set clear rules for her future life.} \\
+ \hline
+ 
+ \textbf{Reference} & Jenže teď už čekat nehodlá a do dalšího života stanovila jasná pravidla.\\
+           & \textit{But now, she doesn't intend wait any further and she established for her future life clear rules.} \\
 
+ \hline
+ \textbf{Hypothesis} &  Nicméně nechce čekat a nastavit jasná pravidla pro svůj budoucí život. \\
+            & \textit{However, she doesn't want to wait and set up clear rules for her future life.}  \\ 
+
+ \hline
+ \textbf{No reordering} & Jenže teď už nechce čekat a do dalšího života stanovila jasná pravidla. \\
+             & \textit{But now, she doesn't want wait any further and she set up for her future life clear rules.}\\
+ \hline 
+ \textbf{New reference} & Jenže teď už nechce čekat a nastavila jasná pravidla do dalšího života. \\
+               &\textit{But now, she doesn't want wait any further and she set up clear rules for her future life. } \\
+
+\end{tabular}
+}
+\caption{Example of the Treex paraphrasing method.}
+\label{example:Treex}
+\end{center}
+\end{figure*}
+
+\subsubsection{Results}
+\begin{table*}[tb]
+\begin{center}
+\begin{tabular}{l|ccc}
+\multicolumn{4}{c}{\textbf{WMT12}}\\
+\hline
+reference & original & before reordering & new reference \\
+\hline
+BLEU & 0.751 & 0.783  & 0.804 \\
+Ex.Met & 0.848 & 0.900 & 0.903 \\
+%\hline
+\end{tabular} 
+
+\quad
+
+\begin{tabular}{l|ccc}
+\multicolumn{4}{c}{\textbf{WMT13}}\\
+\hline
+reference & original & before reordering & new reference \\
+\hline
+BLEU & 0.834 &  0.873 & 0.878 \\
+Ex.Met & 0.848 & 0.893 &  0.893\\
+%\hline
+\end{tabular}
+
+\caption{Pearson's correlation of Meteor and the human judgment.}
+\label{treex_results:12:13}
+\end{center}
+\end{table*}
+
+Example of the method, see \Fref{example:Treex}, TODO: nejake ilustracni stromy, result see \Tref{treex_results:12:13}
 
 \section{Future Work}
 We would like to work to enhance Treex paraphrases, next step could be multiword 
-paraphrases, better word reordering, deleting empty word (stuffing?], pekny by byly
+paraphrases, better word reordering, deleting unnecessary wordy, syntactic paraphrases.
+ pekny by byly
 taky nejaky ty hierarchicke pravidla. 
 
-Ze ciste zvedavosti bych to taky chtela aplikovat na dalsi jazyky pro ktere ma treex
+Ze zvedavosti bych to taky chtela aplikovat na dalsi jazyky pro ktere ma treex
 analyzu a syntezu, AJ, ES...
 
 \bibliographystyle{acl}
 \bibliography{biblio}
 
+\newpage
+\newpage 
 \section*{Appendix}
 \subsection*{Automatic Filtering of Meteor tables}
 \label{multiword_filtering}
