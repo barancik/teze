@@ -308,9 +308,7 @@ example: \textit{svého názoru} (its opinion) and \textit{šermovat rukama a
 mlátit neviditelného} (to flail one's arms and to beat the invisible one) are 
 selected as a paraphrase. We show that the amount of noise in the multi-word 
 paraphrases is so high that no automatic filtering method we used outperforms 
-omitting them completely. (see Appendix - \ref{multiword_filtering}) 
-TODO: mozna uplne vynechat a odkazat jen na LRECovsky clanek??
-%Mozna je teda uplne vynechat i z toho lrecovskyho experimentu
+omitting them completely \cite{barancikova:2014}.
  
 Among one-word paraphrases the noise is sparser, but there are still pairs like 
 \textit{1873} - \textit{pijavice} (a leech) or \textit{afgh\'{a}nci} (Afghans) -
@@ -503,62 +501,6 @@ Baseline~correlation: \textbf{0.829}
 We use a freely available implementation\footurl{http://www.cnts.ua.ac.be/~vincent/scripts/rtest.py} of \newcite{meng:1992} to determine whether the difference in correlation
 coefficients is statistically significant. The test shows that BLEU performs
 better with our reference sentences with 99\% certainty. 
-
-\begin{figure}[tb]
-\begin{center}
-\scalebox{0.89}{
-\begin{tabular}{ll}
- Source &  \begin{tabular}{l}
-  	\textit{The location alone is classic.} \\
-	\end{tabular} \\
- \hline
- 
- Hypothesis & \begin{tabular}{llll}
- 			\textit{Samotné} & \textit{místo} & \textit{je} & \textit{klasické.} \\
- 			Actual & place & is & classic \\
-			\end{tabular} \\
- &  \begin{tabular}{l}
-  	The place alone is classic. \\
-	\end{tabular} \\
-
- \hline
- %\noindent\rule{8cm}{0.4pt}\\
- Reference & \begin{tabular}{llll}
- 			\textit{Už} & \textit{poloha} & \textit{je} & \textit{klasická.} \\
- 			Already & position & is & classic. \\
-			\end{tabular} \\
- &  \begin{tabular}{l}
-  	The position itself is classic. \\
-	\end{tabular}  \\ 
-
- \hline
-  New ref. & \begin{tabular}{llll}
- 			\textit{Už} & \textit{místo} & \textit{je} & \textit{klasická.} \\
- 			Already & place & is & classic \\
-			\end{tabular} \\
- &  \begin{tabular}{l}
-  	*The place itself is classic. \\
-	\end{tabular} \\
- \hline 
-  Depfixed ref. & \begin{tabular}{llll}
- 			\textit{Už} & \textit{místo} & \textit{je} & \textit{klasické.} \\
- 			Already & place & is & classic \\
-			\end{tabular} \\
- &  \begin{tabular}{l}
-  	The place itself is classic. \\
-	\end{tabular} \\
- \hline  
- 
-\end{tabular}
-}
-\caption{Example of the \textit{One-word only} method. The~hypothesis is 
-grammatically correct and has very similar meaning as the reference sentence. 
-The new reference is closer in wording to the hypothesis, but there is no 
-agreement between the noun and adjective. Depfix resolves the error and the 
-final reference is correct and much similar to~the hypothesis.}
-\label{example}
-\end{center}
-\end{figure}
 
 Multi-word paraphrases are very noisy and while they do bring the system 
 outputs closer to the reference (the average BLEU score of the systems 
@@ -947,80 +889,148 @@ In the \textbf{LM+0.4} setting, they also differ a lot in wording from both the
 hypothesis and the reference sentence.
 
 \subsection{Rule based Machine Translation}
+\begin{figure*}[tb]
+\begin{center}
+%\scalebox{0.89}{
+%\begin{tabular}{l|l}
+ \begin{tabular}{l|l}
+ Source &  \begin{tabular}{l}
+  	\textit{The Internet has caused a boom in these speculations.} \\
+	\end{tabular} \\
+ \hline
+ 
+ Hypothesis & \begin{tabular}{lllllll}
+ 			Internet & vyvolal & boom & v  & t\v{e}chto & spekulac\'{i}ch & . \\
+ 			\textit{Internet} & \textit{caused} & \textit{boom} & \textit{in} & \textit{these} & \textit{speculations} & \textit{.}\\
+			\end{tabular} \\
+ &  \begin{tabular}{l}
+  	\textit{The Internet has caused a boom in these speculations. }\\
+	\end{tabular} \\
+
+ \hline
+ %\noindent\rule{8cm}{0.4pt}\\
+ Reference & \begin{tabular}{llllll}
+ 			Rozkv\v{e}t & t\v{e}chto & spekulac\'{i} & zp\r{u}sobil & internet & .  \\
+ 			\textit{Boom} & \textit{these} &  \textit{speculations} & \textit{caused} & \textit{internet} & \textit{.} \\
+			\end{tabular} \\
+ &  \begin{tabular}{l}
+  	\textit{Boom of these speculation was caused by the Internet.} \\
+	\end{tabular}  \\ 
+
+\end{tabular}
+
+\vspace{20pt}
+
+\includegraphics[scale=0.4]{example.png} 
+
+\caption{Example of the paraphrasing. The~hypothesis is grammatically correct 
+and has very similar meaning as the reference sentence.  We analyse both 
+sentences to t-layer, where we create new reference sentence by substituting
+synonyms from hypothesis to the reference. In the next step, we will change also
+the word order to better reflect the hypothesis.}
+\label{example}
+\end{center}
+\end{figure*}
+
 Based on previous results, Moses does not seem to be the optimal tool for our 
-task, especially unless we have at our disposal better paraphrasing tables, or
-we develop better targeting function. %TODO: lepsi tuning? 
+task, especially unless we have at our disposal better paraphrasing tables,
+we develop better targeting function and employ other tuning function. 
+%TODO: lepsi tuning? e.g. MIRA 
 
 Furthermore, there may be a better solution than a phrase-based translation
-system -- namely a highly modular NLP software system Treex, developed for 
-TectoMT, a rule-based machine translation system that operates on a deep 
-syntactic layer.
+system -- namely a rule-based machine translation system TectoMT \cite{tectomt},
+which is included in a highly modular NLP software system Treex \cite{treex}.
+Treex is opensource and is available on 
+GitHub\footurl{https://github.com/ufal/treex}, including our modifications. 
 
 Treex implements the stratificational approach to language, adopted from the 
-Functional Generative Description theory \cite{FGP} and its later extension by 
-the Prague Dependency Treebank \cite{PDT3.0}. It represents sentences in four 
-layers: word layer (w-layer), morphological layer (m-layer), 
-shallow-syntax/analytical layer (a-layer) and deep-syntax/tectogrammatical 
-layer (t-layer).
+Functional Generative Description theory \cite{FGP} and its later extension 
+applied in the Prague Dependency Treebank \cite{PDT3.0}. It represents 
+sentences at four layers: 
+\begin{itemize}
+\item \textbf{w-layer:} word layer; no linguistic annotation
+\item \textbf{m-layer:} morphological layer; sequence of tagged and lemmatized 
+words
+\item \textbf{a-layer:} shallow-syntax/analytical layer; sentence is 
+represented as a surface syntactic dependency tree
+\item \textbf{t-layer:} deep-syntax/tectogrammatical layer; sentence is 
+represented as a dependency tree, where autosemantic words only have their own 
+nodes; t-nodes consist of a t-lemma and a set of attributes -- a \textit{formeme} 
+(information about the original syntactic form) and a set of \textit{grammatemes} 
+(essential morphological features).
+\end{itemize} 
 
-In TectoMT, a sentence in a source language is analyses from w-layer to 
-t-layer, transferred to a second language t-layer, and a translation is 
-generated from t-layer to a-layer.
-
-%Treex is opensource and is available on github (link), including the two
-%blocks that we contributed (link, link), as well as the scripts to run our method
-%(link). The following text describes the implementation of our approach, and
-%corresponds to a Treex scenario (link).
-
-Using Treex, we can easily overcome some of the problems of paraphrasing using 
-Moses. First of all, we can only compare two sentences and there is no need to 
-create paraphrase tables, thus less space for the noise to interfere. Also 
-there already is highly developed machinery to avoid ungrammatical sentences. 
-We can change only parts of sentences that are dependent on the changed word, 
-thus keeping the rest of the sentence correct and creating more conservative 
-references.
-%
-%We performed simple paraphrasing using Treex and started with implement the
-%reordering module.
 \subsection{Paraphrasing using Treex}
+In TectoMT \cite{tectomt}, a sentence in a source language is analyses from 
+w-layer to t-layer, where is transferred to a second language t-layer and the 
+translation is generated to w-layer. 
+
 The analysis and generation pipeline is taken from the TectoTM system. In our 
-setting, we transfer both hypothesis and reference sentence to the t-layer, 
-where we replace the transfer phase with module for t-lemma paraphrasing. 
-After paraphrasing we perform synthesis to a-layer, where we plug a reordering 
-module a continue with synthesis to the w-layer. 
+setting, w we transfer a hypothesis and a corresponding reference sentence to 
+the t-layer, where we replace the translation phase with a module for t-lemma 
+paraphrasing. After paraphrasing, we perform synthesis to a-layer, where we 
+plug in a reordering module and continue with synthesis to the w-layer. 
 
-\subsubsection{Analysis}
-The analysis from w-layer to a-layer includes tokenization, POS-tagging and 
-lemmatization using MorphoDiTa \cite{morphodita}, dependency parsing using the 
-MSTParser \cite{McDonald:2005} adapted by \newcite{Novak:2007}, trained on PDT.
+This way, we can easily overcome some of the problems of paraphrasing using 
+Moses. Most importantly, we can only compare two sentences and there is no need 
+to create translation tables, thus less space for the noise to interfere. Also 
+there already is highly developed machinery to avoid ungrammatical sentences. 
 
-Surface-syntax a-tree is then converted into deep-syntax t-tree. Auxiliary 
+\subsubsection{Analysis from w-layer to t-layer}
+The analysis from the w-layer the to a-layer includes tokenization, POS-tagging
+and lemmatization using MorphoDiTa \cite{morphodita}, dependency parsing using
+the MSTParser \cite{McDonald:2005} adapted by \newcite{Novak:2007}, trained on
+PDT.
+
+A surface-syntax a-tree is then converted into a deep-syntax t-tree. Auxiliary 
 words are removed, with their function now represented using t-node attributes 
 (grammatemes and formemes) of autosemantic words that they belong to (e.g. two
-a-nodes of the verb form “has been played” would be collapsed into one t-node
-“play”, with the tense grammateme set to past and the diathesis grammateme
-set to passive; “in May” would be collapsed into “May” with formeme in+X).
+a-nodes of the verb form \textit{spal jsem} (``I slept'') would be collapsed 
+into one t-node \textit{spát} (``sleep'') with the tense grammateme set to 
+past; \textit{v květnu} (``in May'') would be collapsed into \textit{květen} 
+(``May'') with the formeme \textit{v+X} (``in+X'').
 
-Morphological features are converted into grammatemes as well. The t-nodes
-thus consist of a t-lemma and a set of attributes (a formeme and a set of 
-grammatemes); however, the surface form of the words is not represented on 
-t-layer.
+%tady zminit proc vlasne chceme parafrazovat pres tektokgramatickou rovinu
+% jednak existuji scenare pro cestu tam a dolu a jednak na te rovine jsou slova
+% zbavena uz prakticky vsech syntaktickych informaci. 
+We choose the t-layer for paraphrasing, because the words from the sentence 
+are lemmatized and free of syntactical information. Furthermore, functional 
+words, which we do not want to paraphrase and that cause a lot of noise in our 
+paraphrase tables, do not appear here.
+TODO: Furthermore the syntactic information of the original sentence is hidden
+inside the grammatemes. And really do not want to change them (mozna nejaky
+ty diathese, to se uvidi)
+
+\begin{figure*}[tb]
+\begin{center}
+\includegraphics[scale=0.32]{reordering.png} 
+\caption{Continuation of \Fref{example}, reordering of the paraphrased reference
+sentence.}
+\label{reordering}
+\end{center}
+\end{figure*}
 
 \subsubsection{Paraphrasing}
-The paraphrasing block T2T::ParaphraseSimple is freely available at GitHub (TODO: url). 
-If no translation t-node bears the t-lemma A of the reference t-node R, and
-if there exists a t-lemma B that is a paraphrase of the t-lemma A according
-to WordNet or filtered Meteor, and there is a translation node T which bears 
-the t-lemma B, and no t-node of the reference bears the t-lemma B, then the 
-t-lemma of the reference t-node R is changed from A to B.
+The paraphrasing module T2T::ParaphraseSimple is freely available at 
+GitHub.\footurl{https://github.com/ufal/treex/blob/master/lib/Treex/Block/T2T/ParaphraseSimple.pm} 
+
+T-lemma of a reference t-node is changed from A to B if and only if:
+\begin{enumerate}
+\item there is no hypothesis t-node with lemma A
+\item there is a hypothesis t-node with lemma B 
+\item there is no reference t-node with lemma B
+\item A and B are paraphrases according to our paraphrase tables
+\end{enumerate}
 
 The other attributes of the t-node are kept unchanged based on the theory that
 semantic properties are independent of the t-lemma. However, in practice, there 
 is at least one case where this is not true: t-nodes corresponding to nouns are 
 marked for grammatical gender, which is very often a grammatical property of 
-the given lemma with no effect on the meaning (for example, “a house” can be 
-translated either as a masculine noun “d\o{u}m” or as feminine noun “budova”),
+the given lemma with no effect on the meaning (for example, ``a house'' can be 
+translated either as a masculine noun \textit{dům} or as feminine noun 
+\textit{budova}).
 %; we really believe this should be marked on the lemma only, but this is not the case in Treex. 
+
 Therefore, when paraphrasing a t-node that corresponds to a noun, we delete 
 the value of the gender grammateme, and let the subsequent synthesis pipeline 
 generate the correct value of the morphological gender feature value (which is 
@@ -1028,102 +1038,66 @@ necessary to ensure correct morphological agreement with surrounding words,
 such as adjectives and verbs).
 
 \subsubsection{Synthesis from t-layer to a-layer}
-In this phase, a-nodes corresponding to auxiliary words and punctuation are 
-generated, morphological feature values on a-nodes are initialized and set to 
-enforce morphological agreement among the nodes. Correct word forms based 
-on lemma and POS, and morphological features are generated using MorphoDiTa.
-
-\subsubsection{Tree-based reordering}
-The reordering block A2A::ReorderByLemmas is freely available at GitHub (TODO: url).
+The reordering block %A2A::ReorderByLemmas 
+is freely available at 
+GitHub.\footnote{The url is hidden due to anonymisation}
+%\footurl{https://github.com/ufal/treex/blob/master/lib/Treex/Block/A2A/ReorderByLemmas.pm}
 
 The idea behind the block is to make the word order of the new reference as 
 similar to the word order of the translation, but with some tree-based 
-constraints to avoid ungrammatical sentences. The general approach is to 
-reorder the subtrees rooted at modifier nodes of a given head node so that they 
-follow in an order that is on average similar to their order in the translation.
+constraints to avoid ungrammatical sentences. 
+
+The general approach is to reorder the subtrees rooted at modifier nodes of a 
+given head node so that they follow in an order that is on average similar to 
+their order in the translation. \Fref{reordering} shows the reordering process 
+of the a-tree from \Fref{example}.
 
 %As the ultimate MT quality metric we apply to compare the translation and
-%the reference is word based, we align translation and reference words that have
+%he reference is word based, we align translation and reference words that have
 %an identical lemma. Reordering reference words with a lemma that does not
 %appear in the translation has little effect on the resulting score given by the
-%metric, we thus treat those as unaligned words. For simplicity, we also treat
-%repeated words as unaligned, as it is not straightforward to decide which of the
-%possible alignments to use; however, repeated words are rather rare. 
+%metric, we thus treat those as unaligned words. %For simplicity, we also treat
+%repeated words as unaligned, as it is not straightforward to decide which of 
+%the possible alignments to use; however, repeated words are rather rare. 
 %TODO future work – align more words.
-%Our reordering proceeds in several steps.
 
-Each a-node has order, i.e. position in the sentence. % (the a-nodes are number
-%by numbers from 1 to N where N is the number of tokens in the sentence).
-First, we define the \textit{MT order} of each reference a-node as the order of its
-corresponding translation a-node, i.e. a node with the same lemma. We define
-the MT order only if there is exactly one a-node with the given lemma in the
-translation and exactly one in the reference; thus, the MT order is undefined
-for some nodes.
+Our reordering proceeds in several steps. Each a-node has order, i.e. position 
+in the sentence.  We define the \emph{MT order} of a reference a-node as the 
+order of its corresponding hypothesis a-node, i.e. node a node with the same 
+lemma. 
 
-Next, we compute the subtree MT order of each reference a-node R as the
-average MT order of all a-nodes in the subtree rooted at the a-node R (including
-the MT order of R itself). Only nodes with a defined MT order are taken into
-account; thus, also the subtree MT order is undefined for some nodes. The
-calculation of subtree MT order is performed recursively and is thus efficient.
-Then, we iterate over all a-nodes, and for each a-node with at least one
-dependent node, we reorder the sequence S of the head a-node H and its de-
-pendent a-nodes D i . For each of the nodes (H, D i ), we define its sorting order.
-The sorting order of H is defined as its MT order The sorting order of each
-dependent node D i is defined as its subtree MT order.
-If for a node its sorting order is undefined, it is set to the sorting order of
-the node that precedes it in the sequence S, thus favouring neighbouring nodes
-(or subtrees) to be reordered together in case there is no evidence that they
-should be brought apart from each other. If the node is first in the sequence S,
-its sorting order is defined as 0.
-Additionally, a 1/1000th of the original order of the node is added to its
-sorting order (for each D i as well as for H); this is to break ties in such a way
-that the original ordering of the nodes is preferred to reordering them.
-And finally, the sequence of the nodes is reordered according to their sorting
-order. If a node is a root of a subtree, the whole subtree is moved and its
-internal ordering is kept; unless it is the H node, which, obviously, is always
-moved alone, without its dependents.
-We do not handle non-projective edges in any special way, so they always
-get projectivized if they take part in a reordering process, or kept if they do
+We set the MT order only if there is exactly one a-node with the given lemma 
+in both the hypothesis and the reference. Therefore, the MT order might be 
+undefined for some nodes.
+
+In the next step, we compute the \emph{subtree MT order} of each reference 
+a-node R as the average MT order of all a-nodes in the subtree rooted at the 
+a-node R (including the MT order of R itself). Only nodes with a defined MT 
+order are taken into account, so the subtree MT order can be undefined for 
+some nodes. 
+
+Finally, we iterate over all a-nodes recursively starting from the bottom. Head 
+a-node $H$ and its dependent a-nodes $D_i$ is reorder if they violate the
+\emph{sorting order}. If $D_i$ is a root of a subtree, the whole subtree is 
+moved and its internal ordering is kept.
+
+The sorting order of $H$ is defined as its MT order; the sorting order of each 
+dependent node $D_i$ is defined as its subtree MT order. If a sorting order of 
+a node is undefined, it is set to the sorting order of the node that precedes 
+it, thus favouring neighbouring nodes (or subtrees) to be reordered together in 
+case there is no evidence that they should be brought apart from each other. 
+Additionally, each sorting order is added 1/1000th of the original order of the 
+node -- in case of a tie, the original ordering of the nodes is preferred to 
+reordering.
+
+We do not handle non-projective edges in any special way, so they always get 
+projectivized if they take part in a reordering process, or kept if they do
 not. However, no new non-projective edges are created in the process – this is
 ensured by always moving the subtrees at once.
+
 Please note that each node can take part in at most two reorderings – once
-as the H node and once as a D i node. Moreover, the nodes can be processed in
-any order, as a reordering does not influence any other reordering.
-
-
-%Example:
-%Ref: Jenže teď už čekat nehodlá a do dalšího života stanovila jasná pravidla.
-%MT: Nicméně nechce čekat a nastavit jasná pravidla pro svůj budoucí život.
-%NO_reordering: Jenže teď už nechce čekat a do dalšího života stanovila jasná pravidla.
-%RES:Jenže teď už nechce čekat a nastavila jasná pravidla do dalšího života.
-
-\begin{figure*}[tb]
-\begin{center}
-\scalebox{0.95}{
-\begin{tabular}{l|r}
- \textbf{Source}  &  \textit{However, she does not want to wait any longer, and set clear rules for her future life.} \\
- \hline
- 
- \textbf{Reference} & Jenže teď už čekat nehodlá a do dalšího života stanovila jasná pravidla.\\
-           & \textit{But now, she doesn't intend wait any further and she established for her future life clear rules.} \\
-
- \hline
- \textbf{Hypothesis} &  Nicméně nechce čekat a nastavit jasná pravidla pro svůj budoucí život. \\
-            & \textit{However, she doesn't want to wait and set up clear rules for her future life.}  \\ 
-
- \hline
- \textbf{No reordering} & Jenže teď už nechce čekat a do dalšího života stanovila jasná pravidla. \\
-             & \textit{But now, she doesn't want wait any further and she set up for her future life clear rules.}\\
- \hline 
- \textbf{New reference} & Jenže teď už nechce čekat a nastavila jasná pravidla do dalšího života. \\
-               &\textit{But now, she doesn't want wait any further and she set up clear rules for her future life. } \\
-
-\end{tabular}
-}
-\caption{Example of the Treex paraphrasing method.}
-\label{example:Treex}
-\end{center}
-\end{figure*}
+as the $H$ node and once as a $D_i$ node. Moreover, the nodes can be processed 
+in any order, as a reordering does not influence any other reordering.
 
 \subsubsection{Results}
 \begin{table*}[tb]
@@ -1166,75 +1140,12 @@ taky nejaky ty hierarchicke pravidla.
 Ze zvedavosti bych to taky chtela aplikovat na dalsi jazyky pro ktere ma treex
 analyzu a syntezu, AJ, ES...
 
+Deprefset, z nej by bylo mozne vykoukat syntakticke parafraze a pripustne zmeny slovosledu
+
+We can change only parts of sentences that are dependent on the changed word, 
+thus keeping the rest of the sentence correct and creating more conservative 
+references.
+
 \bibliographystyle{acl}
 \bibliography{biblio}
-
-\newpage
-\newpage 
-\section*{Appendix}
-\subsection*{Automatic Filtering of Meteor tables}
-\label{multiword_filtering}
-Filtering strategies described in~this section are based on assigning a score 
-to each paraphrase pair. We then gradually remove paraphrases with low scores 
-and measure the effect on~the final correlation of~our metric.
-
-The first, straightforward approach is to use the paraphrase scores already
-provided in Meteor. They are based on~phrasal translation probabilities and it 
-corresponds to~paraphrase probability in~the pivoting model.
-
-We propose an alternative scoring based on pivoting and lexical translation
-scores:
-
-$$\text{lex\_p}(\mathbf{s},\mathbf{t}) = \sum_{s \in \mathbf{s}}\sum_{t \in
-\mathbf{t}}\sum_{pivot}\text{lex}(s|pivot)\text{lex}(pivot|t)$$
-
-In this case, pivots are all words aligned to both $s$ and $t$ in the parallel
-data. To get lexical translation probabilities, we use maximum likelihood
-estimation from single best word alignment computed on CzEng 1.0
-\cite{czeng10:lrec2012}. We refer to this score as \emph{lexical pivoting}.
-
-We use random selection as the baseline -- paraphrases are simply shuffled and 
-we then use the first 10, 20,$\ldots$ percent of them.
-
-We only evaluate the filtering techniques on the WMT12 data. First, we attempt
-to filter one-word paraphrases and use the cleaner paraphrase table in the
-\emph{one-word-only} paraphrasing strategy. Note that our paraphrase table has
-already been filtered using the error-analysis based filtering described in 
-\Sref{Data}.
-
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[scale=0.55]{filtering-lexical-cropped.pdf}
-\caption{Comparison of automatic filtering techniques for~\emph{one-word} 
-paraphrases on WMT12 data.} 
-\label{fig:filtering-lexical}
-\end{center}
-\end{figure}
-
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[scale=0.55]{filtering-mwe-cropped.pdf}
-\caption{Automatic filtering of multi-word paraphrase for~the 
-\textit{multi-word-first} scenario on WMT12 data.}
-\label{fig:filtering-mwe}
-\end{center}
-\end{figure}
-
-
-\Fref{fig:filtering-lexical} shows the performance of different filtering
-techniques for one-word paraphrases. Relying on Meteor scores proves worse than
-random selection. Using lexical pivoting, we can keep a high correlation even 
-if we throw away as much as 90\% of the paraphrases, however we do not improve 
-(by~a~relevant margin) upon the baseline correlation of 0.802 achieved by
-\emph{one-word-only} paraphrasing with the full paraphrase table.
-
-We evaluate the best-performing technique also in the \textit{multi-word-first}
-scenario where we use it for filtering multi-word paraphrases (see
-\Fref{fig:filtering-mwe}). As we reduce the number of paraphrases, we observe a
-considerable improvement of~correlation, however we never outperform
-\textit{one-word-only} or \textit{one-word-first}. In this case, the filtering
-simply mitigates the damage done by the multi-word paraphrases. We
-cannot hope to achieve a higher score without a~more fine-grained grip on what
-a~good multi-word paraphrase is.
-
 \end{document}
