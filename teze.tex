@@ -428,9 +428,9 @@ with the \textit{One-word only} method.
 \multirow{2}{*}{Method} & \multicolumn{2}{c|}{Greedy selection} & \multicolumn{2}{c}{Word alignment} \\
 & No Depfix & Full Depfix  & No Depfix & Full Depfix \\
 \hline
-One-word only     & 0.804 & \textbf{0.834} & 0.792 & 0.813 \\
-One-word first    & 0.788 & 0.825 & 0.767 & 0.792  \\
-Multi-word first  & 0.755 & 0.813 & 0.761 & 0.781  \\
+One-word only     & 0.804 & \textbf{0.834} & 0.794 & 0.815 \\
+One-word first    & 0.788 & 0.825 & 0.763 & 0.800  \\
+Multi-word first  & 0.755 & 0.813 & 0.761 & 0.795  \\
 \end{tabular}
 
 \vspace{10pt}
@@ -444,13 +444,14 @@ Baseline~correlation: \textbf{0.751}
 & No Depfix & Full Depfix  & No Depfix & Full Depfix \\
 \hline
 One-word only     & 0.865 & \textbf{0.891} & 0.860 & 0.881  \\
-One-word first    & 0.854 & 0.884  & 0.836 & 0.871 \\
-Multi-word first  & 0.841 & 0.875  & 0.840 & 0.868  \\
+One-word first    & 0.854 & 0.884  & 0.836 & 0.874 \\
+Multi-word first  & 0.841 & 0.875  & 0.840 & 0.871  \\
 \end{tabular}
 
 \vspace{10pt}
 Baseline~correlation: \textbf{0.834}
-\caption{Correlation of the human judgment and BLEU using the simple substitution method.}
+\caption{Correlation of the human judgment and BLEU on new references created
+by the simple substitution method.}
 \label{lrec_results}
 \end{center}
 \end{table*}
@@ -605,12 +606,11 @@ them yet again, but this time as~an~inner part of~the Meteor evaluation metric
 \begin{tabular}{r|c|l}
 setting & size & description of the paraphrase table \\
 \hline
-\textbf{Basic} & 684k & The original Meteor Paraphrase Tables \\
+\textbf{Standard} & 684k & The original Meteor Paraphrase Tables \\
 \textbf{One-word} & 181k & \textbf{Basic} without multi-word pairs\\
 \textbf{Same POS} & 122k & \textbf{One-word} + only same part-of-speech pairs\\
-\textbf{Diff. Lemma} & 71k & \textbf{Same POS} + only forms of different lemma\\
-\textbf{Same Lemma} & 51k & \textbf{Same POS} + only forms of same lemma\\
-\textbf{No paraphr.} & 0 & No paraphrase tables, i.e., exact match only\\
+\textbf{Different Lemma} & 71k & \textbf{Same POS} + only forms of different lemma\\
+\textbf{Exact match} & 0 & No paraphrase tables\\
 \textbf{WordNet} & 202k & Paraphrase tables generated from Czech WordNet\\
 \end{tabular}
 }
@@ -620,10 +620,10 @@ setting & size & description of the paraphrase table \\
 \end{table*}
 
 The filtering of~the paraphrase tables is performed analogically. We experiment
-with seven different settings that are presented in~\Tref{meteory}. All of them
+with six different settings that are presented in~\Tref{meteory}. All of them
 are created by reducing the original Meteor Paraphrase tables, except for the 
-setting referred to~as~\textbf{WordNet}. In this setting, the paraphrase table 
-is generated from one-word paraphrases in Czech WordNet to all their possible 
+setting referred to~as~\textbf{WordNet}, which has its paraphrase table 
+generated from one-word paraphrases in Czech WordNet to all their possible 
 word forms appearing in~CzEng \cite{czeng}.
 %
 %Prior paraphrasing reference sentences and using Meteor with the \textbf{No 
@@ -634,50 +634,50 @@ word forms appearing in~CzEng \cite{czeng}.
 
 \begin{table*}[tb]
 \begin{center}
-\scalebox{0.95}{
-\begin{tabular}{l|ccccccc}
-\multicolumn{8}{c}{\textbf{WMT12}}\\
+%\scalebox{0.95}{
+\begin{tabular}{l|cccccc}
+\multicolumn{7}{c}{\textbf{WMT12}}\\
 \hline
-reference & Basic & One-word & Same POS & Same Lemma & Diff. Lemma & No paraphr. & WordNet \\
+references & Standard & One-word & Same POS &  Different Lemma & Exact match & WordNet \\
 \hline
-Original & 0.833 & 0.836 & 0.840 & 0.838 & 0.863 & 0.861 & 0.863 \\
-Before Depfix & 0.905 & 0.908 & 0.911 & 0.911 & 0.931 & 0.931 & 0.931 \\
-New & 0.927 & 0.930 & 0.931 & 0.932 & 0.950 & \textbf{0.951} & \textbf{0.951} \\
+Original references & 0.833 & 0.836 & 0.840 & 0.863 & 0.861 & 0.863 \\
+Before Depfix & 0.905 & 0.908 & 0.911 & 0.931 & 0.931 & 0.931 \\
+New references & 0.927 & 0.930 & 0.931 & 0.950 & \textbf{0.951} & \textbf{0.951} \\
 %\hline
-\end{tabular}} 
+\end{tabular}
+%} 
 
 \vspace{10pt}
 
-\scalebox{0.95}{
-\begin{tabular}{l|ccccccc}
-\multicolumn{8}{c}{\textbf{WMT13}}\\
+%\scalebox{0.95}{
+\begin{tabular}{l|cccccc}
+\multicolumn{7}{c}{\textbf{WMT13}}\\
 \hline
-references & Basic & One-word & Same POS & Same Lemma & Diff. Lemma & No paraphr. & WordNet \\
+references & Standard & One-word & Same POS & Different Lemma & Exact match & WordNet \\
 \hline
-Original & 0.817 & 0.820 & 0.823 & 0.821 & 0.850 & 0.848 & 0.850 \\
-Before Depfix  & 0.865 & 0.867 & 0.869 & 0.868 & 0.895 & 0.895 & 0.894 \\
-New  & 0.891 & 0.892 & 0.893 & 0.892 & \textbf{0.915} & \textbf{0.915} & \textbf{0.915} \\
+Original references & 0.817 & 0.820 & 0.823 & 0.850 & 0.848 & 0.850 \\
+Before Depfix  & 0.865 & 0.867 & 0.869 & 0.895 & 0.895 & 0.894 \\
+New references & 0.891 & 0.892 & 0.893 & \textbf{0.915} & \textbf{0.915} & \textbf{0.915} \\
 %\hline
 \end{tabular}
-}
-\caption{Pearson's correlation of Meteor and the human judgment.}
-\label{results:12:13}
+%}
+\caption{Pearson's correlation of Meteor and the human judgment on original reference sentences and sentences created by the \textit{One-word only} method.}
+\label{meteor_results}
 \end{center}
 \end{table*}
 
-The results of our experiments are presented in \Tref{results:12:13}, they are 
+The results of our experiments are presented in \Tref{meteor_results}, they are 
 very consistent for WMT12 and WMT13. We show that independently of~a~reference 
 sentence used, reducing the Meteor paraphrase tables in evaluation is always 
-beneficial.
-
-Tests show that prior paraphrasing references and Meteor without paraphrase
-support significantly outperform the original Meteor on our data.
+beneficial. The Meteor metric with exact match only on paraphrased references 
+significantly outperforms Meteor with paraphrase support on original 
+references.
 
 \textbf{Diff. Lemma} and \textbf{WordNet} settings give the best results on the 
 original reference sentences. That is because they are basically a limited 
 version of the paraphrase tables we use for creating our new references, which 
-contain both all different lemmas of the same part of speech from Meteor 
-Paraphrase tables and all lemmas from the WordNet.
+contain both all different lemmas of the same part of speech from the Meteor 
+Paraphrase tables and all lemmas from Czech WordNet.
 
 The main reason of the worse performance of the metric when employing the 
 Meteor Paraphrase tables is the noise. The metric may award even parts of the 
@@ -686,48 +686,51 @@ some English words and their Czech translations as paraphrases. There are for
 ~example pairs: \textit{pšenice} - \textit{wheat}\footnote{In all examples the 
 Czech word is the correct translation of the English side.}, \textit{vůdce} - 
 \textit{leader}, \textit{vařit} -	\textit{cook}, \textit{poloostrov} - 
-\textit{peninsula}. For these reasons, the differences among the systems are 
-more blurred and the metric performs worse than without using the paraphrases. 
+\textit{peninsula}.
 
 \section{Paraphrasing using Machine Translation}
 \label{MT}
-While the previous method offers good result, it is very limited. We would like
-to be able to use longer paraphrases, word order changes, switch between active 
-and pasive construction, etc.
+While the one-word substitution method offers good results, it is very limited. 
+We would like to be able to use longer paraphrases, word order changes, switch 
+between active and passive construction, etc.
 
 For this purpose, we employ machine translation itself -- there are many tools 
-for MT and there is close resemblance between translation and paraphrasing. 
+for MT and there is a close resemblance between translation and paraphrasing. 
 They both attempt to preserve the meaning of a sentence, the first one between 
-two languages and the second one within one language by different word choice. 
-It seems only natural to attempt to adjust some MT tools to translate within a 
-single language for targeted paraphrasing. 
+two languages and the second one within a single language by different word 
+choice. It seems only natural to attempt to adjust some MT tools to translate 
+within a single language for targeted paraphrasing. 
+
+\begin{figure*}
+\includegraphics[scale=0.3]{moses.png} 
+\caption{Simplified scheme of the translation system Moses}
+\label{moses_simple}
+\end{figure*}
 
 We describe this attempt on two types of MT systems -- phrase-based and 
 rule-based. Initially, we experiment with the freely available SMT system 
-Moses. \cite{moses} We create translation from Czech WordNet and the Meteor 
-Paraphrase tables. We extended Moses by a new feature that makes the 
-translation targeted. 
-
-However, the results of this method are inconclusive. In the view of errors 
-appearing in the new paraphrased sentences, we propose another solution -- 
-targeted paraphrasing using a rule-based translation system included in the NLP 
-framework Treex. \cite{treex}
+Moses \cite{moses}. However, the results of this method are inconclusive. 
+In the view of errors appearing in the new paraphrased sentences, we propose 
+another solution -- targeted paraphrasing using a rule-based translation system 
+included in the NLP framework Treex \cite{treex}.
 
 \subsection{Paraphrasing using Moses}
-Moses is a freely available statistical machine translation engine. In a 
-nutshell, statistical machine translation involves the following phases: 
-creating language and translation models, parameter tuning and decoding. We use 
-Moses in the phrase-based setting.
+Moses is a freely available statistical machine translation engine. 
+In~a~nutshell, statistical machine translation involves the following phases: 
+creating language and translation models, parameter tuning and decoding. 
+We use Moses in the phrase-based setting. Simple scheme of Moses is presented
+in \Fref{moses_simple}.
 
 A language model is responsible for a correct word order and grammatical 
-correctness of the translated sentence. A translation model (phrase table) 
-supplies all possible translations of a word or a phrase. Models are assigned 
-weights which are learned during the parameter tuning phase.
+correctness of the translated sentence. A translation model (a phrase table) 
+supplies all possible translations of a word or a phrase or in our case, all 
+possible paraphrases. Models are assigned weights which are learned during the 
+parameter tuning phase.
 
 During the decoding phase, all these models are combined to maximize 
 $ \sum_i \lambda_i \phi_i (\bar{f},\bar{e}) $, where  $ \lambda_i $ is a weight 
-of a the sub-model $ \phi_i $ and $ \bar{f},\bar{e} $ is a hypothesis and 
-source sentence, respectively. In our case, we want to make a reference 
+of the sub-model $ \phi_i $ and $ \bar{f},\bar{e} $ is a hypothesis and 
+a source sentence, respectively. In our case, we want to make a reference 
 sentence closer to a corresponding machine translation output -- $ \bar{e} $ is 
 the reference sentence and $ \bar{f} $ is a new synthetic reference.
 
