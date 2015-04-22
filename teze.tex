@@ -243,10 +243,10 @@ four additional human reference translation in the tuning phase of a MT system.
 \label{Data}
 \subsection{Text Data}
 We perform our experiments on data sets from the English-to-Czech translation 
-task of WMT12 \cite{wmt12}, WMT13 \cite{wmt13}. The data sets contain 1
-3/14\footnote{We use only 12 of them because two of them 
+task of WMT12 \cite{wmt12}, WMT13 \cite{wmt13}. The data sets contain 
+13/14\footnote{We use only 12 of them because two of them 
 (FDA.2878 and online-G) have no human judgments.} files with Czech outputs 
-of different MT systems.
+of different MT systems. Each file contains 3003/3000 sentences.
 
 In addition, each data set contains one file with corresponding reference 
 sentences and one with original English source sentences. We perform 
@@ -317,9 +317,8 @@ table as~to~\textit{filtered Meteor}.
 We experiment with several algorithms for paraphrasing reference sentences. 
 The method in this section is widely based on \newcite{kauchak}. We start with 
 a basic algorithm for phrase substitution from a hypothesis to a reference. 
-
 We experiment with different phrase lengths and two methods for phrase 
-selection -- simple greedy one and word/phrase alignments.
+selection.
 
 The newly created reference may be non grammatical because of the direct
 substitutions from the hypothesis, thus we employ Depfix \cite{depfix}, 
@@ -332,24 +331,24 @@ simple greedy search similar to~\newcite{kauchak}, the other one uses automatic
 word alignment for selecting corresponding segments of~the reference sentence 
 and the hypothesis.
 
-\subsection*{Simple Greedy Method}
-Let $ r_1,..., r_n $,$ w_1,...,w_m $ be the hypothesis and the reference 
+\subsubsection*{Simple Greedy Method}
+Let $ w_1,...,w_m $, $ r_1,..., r_n $ be the hypothesis and the reference 
 sentence, respectively. We performed their tagging and extracted sets of lemmas 
-$ W_{L} $, $ R_{L} $. Then, one-word paraphrase candidates are chosen as:
+ $ W_{L} $, $ R_{L} $. Then, one-word paraphrase candidates are chosen as:
 $$ C_{L} = \lbrace (r,w) | r \in R_{L} \smallsetminus W_{L} \wedge w \in W_{L}
 \smallsetminus R_{L}  \rbrace $$
 
 Multi-words candidates $ C_M $ are selected analogically from all sequences 
 of words from the reference sentence and from the hypothesis. Maximum phrase 
-length is seven words, because that is the length of~the longest paraphrases in 
-the data. % Formally:
+length is seven words (as is the length of~the longest paraphrases in 
+the data). % Formally:
 %
 %\begin{gather*}
 %C_{M} = \lbrace (<r_i,..,r_{i+x}>, <w_j,...,w_{j+y}>) | \: 1 \leq i \leq n-x \: \wedge \\ 
 % \: 1~\leq~j \leq m-y  \: \wedge \: 0 \leq x,y \leq 6 \: \wedge \: (x \neq 0 \vee y \neq 0) \rbrace 
 %\end{gather*}
 
-\subsection*{Word and Phrase Alignments}
+\subsubsection*{Word and Phrase Alignments}
 One possible way to make the algorithm more reliable is to restrict the 
 application of paraphrases to words/phrases which are aligned to each other. We 
 compute word alignment between the reference translation and MT system outputs 
@@ -389,114 +388,165 @@ extracted using phrase extraction for phrase-based MT, the standard consistency
 criterion is~applied \cite{Och99improvedalignment}.
 
 \subsection{Paraphrasing}
-We reduce the set $ C_{L} $ to pairs appearing in our paraphrase tables in the 
-following way. If a word appears in several synonymous pairs we give preference 
-to those found in~WordNet or even better in the intersection of paraphrases 
-from WordNet and filtered Meteor. Similarly, we filter $ C_{M} $ to pairs also 
-contained in the multi-word Meteor tables.
+We reduce the $ C_{M} $ to pairs contained in the multi-word Meteor tables and
+$ C_{L} $ to Czech WordNet and the filtered Meteor. If there is a lemma 
+contained in several pairs in $ C_{L} $, we  give preference to those found 
+in~WordNet or even better in the intersection of paraphrases from WordNet and 
+filtered Meteor.
 
 We evaluate three different paraphrasing methods which differ in the order of
 substitution.
 
-\begin{description}
-\item[One-word only] We proceed word by word from the beginning of the reference 
+%\begin{description}
+\subsubsection*{One-word only}
+%\item[One-word only] 
+We proceed word by word from the beginning of the reference 
 sentence to~its end. If a~lemma of~a~word appears as~the first member of~a~pair 
 in reduced $ C_{L} $, it is replaced by~the word from hypothesis that has its lemma
 as the second element of~that pair, i.e., paraphrase from the hypothesis. Otherwise, 
 we keep the original word from the reference sentence.
-\item[One-word first] We use \textit{One-word only} and then we apply longer paraphrases.
-In that case we move ahead from the longest paraphrases to the shortest. That is because 
+\subsubsection*{One-word first}
+%\item[One-word first] 
+We use \textit{One-word only} and then we apply longer paraphrases.
+We move ahead from the longest paraphrases to the shortest. That is because 
 Meteor contains often even components of~phrases and we could substitute, instead of~whole 
-phrase, only part of~it. We do not attempt to replace any word that was already changed 
-before.
-\item[Multi-word first] We substitute the longest confirmed paraphrases from
+phrase, only part of~it. We do not attempt to replace any word that was already changed.
+\subsubsection*{Multi-word first}
+%\item[Multi-word first] 
+We substitute the longest confirmed paraphrases from
 $ C_{M} $ and move to the shorter ones. We replace again only sequences that have not
-been substituted yet. After this, we paraphrase the remaining unchanged words
+been substituted yet. After this, we paraphrase remaining unchanged words
 with the \textit{One-word only} method.
-\end{description}
+%\end{description}
+
+\begin{table*}[tb]
+\begin{center}
+
+\textbf{WMT12}\\
+\begin{tabular}{l|cc|cc}
+\hline
+\multirow{2}{*}{Method} & \multicolumn{2}{c|}{Greedy selection} & \multicolumn{2}{c}{Word alignment} \\
+& No Depfix & Full Depfix  & No Depfix & Full Depfix \\
+\hline
+One-word only     & 0.804 & \textbf{0.834} & 0.792 & 0.813 \\
+One-word first    & 0.788 & 0.825 & 0.767 & 0.792  \\
+Multi-word first  & 0.755 & 0.813 & 0.761 & 0.781  \\
+\end{tabular}
+
+\vspace{10pt}
+Baseline~correlation: \textbf{0.751}
+\vspace{10pt}
+
+\textbf{WMT13}\\
+\begin{tabular}{l|cc|cc}
+\hline
+\multirow{2}{*}{Method} & \multicolumn{2}{c|}{Greedy selection} & \multicolumn{2}{c}{Word alignment} \\
+& No Depfix & Full Depfix  & No Depfix & Full Depfix \\
+\hline
+One-word only     & 0.865 & \textbf{0.891} & 0.860 & 0.881  \\
+One-word first    & 0.854 & 0.884  & 0.836 & 0.871 \\
+Multi-word first  & 0.841 & 0.875  & 0.840 & 0.868  \\
+\end{tabular}
+
+\vspace{10pt}
+Baseline~correlation: \textbf{0.834}
+\caption{Correlation of the human judgment and BLEU using the simple substitution method.}
+\label{lrec_results}
+\end{center}
+\end{table*}
 
 \subsection{Depfix}
 As we substitute a word form directly from a hypothesis, it may happen that a 
-resulting new reference is not grammatically correct. To rectify this, we apply
-Depfix \cite{depfix} -- an automatic post-editing system which is able to fix 
-Czech sentences containing grammatical errors.
+resulting new reference is not grammatically correct. We rectify these errors 
+by applying Depfix \cite{depfix} -- an automatic post-editing system which is 
+able to fix Czech sentences containing grammatical errors.
 
 Depfix was originally designed for post-editing outputs of English-to-Czech 
 phrase-based machine translation. It consists of a set of~linguistically-motivated 
 rules and a statistical component that correct various kinds of errors, especially 
 in grammar (e.g. morphological agreement), using a range of natural language 
-processing tools to provide analyses of the input sentences.
+processing tools to analyse of the input sentences.
 
 We observe that the errors that appear in the outputs of our paraphrasing 
 algorithm are often similar to some errors appearing in outputs of phrase-based
 machine translation systems, e.g errors in morphological agreement are very 
-common. This makes Depfix a good fit for fixing the errors, since typical 
-grammar correcting tools, such as a grammar-checker in a word processor, focus
-on errors that are typical for humans, not for machines. 
+common. This makes Depfix an appropriate tool for fixing the errors, since 
+typical grammar correcting tools, such as a grammar-checker in a word processor, 
+focus on errors that are typical for humans, not for machines. 
 
 \subsection{Results}
-Results of our method are presented in Table \ref{corrs13} as the Pearson 
+\begin{figure}[t]
+
+\begin{center}
+\scalebox{0.90}{
+\begin{tabular}{ll}
+ Source &  \begin{tabular}{l}
+  	\textit{The location alone is classic.} \\
+	\end{tabular} \\
+ \hline
+ 
+ Hypothesis & \begin{tabular}{llll}
+ 			\textit{Samotné} & \textit{místo} & \textit{je} & \textit{klasické.} \\
+ 			Actual & place & is & classic \\
+			\end{tabular} \\
+ &  \begin{tabular}{l}
+  	The place alone is classic. \\
+	\end{tabular} \\
+
+ \hline
+ Reference & \begin{tabular}{llll}
+ 			\textit{Už} & \textit{poloha} & \textit{je} & \textit{klasická.} \\
+ 			Already & position & is & classic. \\
+			\end{tabular} \\
+ &  \begin{tabular}{l}
+  	The position itself is classic. \\
+	\end{tabular}  \\ 
+
+ \hline
+  New ref. & \begin{tabular}{llll}
+ 			\textit{Už} & \textit{místo} & \textit{je} & \textit{klasická.} \\
+ 			Already & place & is & classic \\
+			\end{tabular} \\
+ &  \begin{tabular}{l}
+  	*The place itself is classic. \\
+	\end{tabular} \\
+ \hline 
+  Depfixed ref. & \begin{tabular}{llll}
+ 			\textit{Už} & \textit{místo} & \textit{je} & \textit{klasické.} \\
+ 			Already & place & is & classic \\
+			\end{tabular} \\
+ &  \begin{tabular}{l}
+  	The place itself is classic. \\
+	\end{tabular} \\
+ \hline  
+ 
+\end{tabular}}
+\caption{Example of the \textit{One-word only} method. The~hypothesis is grammatically 
+correct and has very similar meaning as the reference sentence. The new reference is closer 
+in wording to the hypothesis, but there is no agreement between the noun and adjective. 
+Depfix resolves the error and the final reference is correct and much similar to~the hypothesis.}
+\label{lrec_example}
+\end{center}
+\end{figure}
+
+Results of our method are presented in \Tref{lrec_results} as the Pearson 
 correlation between human judgment and BLEU computed on our new references. 
 All evaluated approaches outperform the~baseline (i.e., using the original 
 reference sentences), the simplest one \textit{One-word only} performs 
-best (\Fref{example} shows an example of this method).
+best (\Fref{lrec_example} shows an example of this method).
 
-\begin{table*}[tb]
-\begin{center}
-\scalebox{0.95}{
-\begin{tabular}{l|ccc|ccc}
-\multicolumn{7}{c}{\textbf{WMT12}}\\
-\hline
-\multirow{2}{*}{Method} & \multicolumn{3}{c|}{Greedy selection} & \multicolumn{3}{c}{Word alignment} \\
-& No Depfix & Full Depfix & Limited Depfix & No Depfix & Full Depfix & Limited Depfix\\
-\hline
-One-word only     & 0.802 & 0.827 & \textbf{0.832} & 0.792 & 0.813 & 0.810 \\
-One-word first    & 0.785 & 0.822 & 0.816 & 0.767 & 0.792 & 0.798 \\
-Multi-word first & 0.768 & 0.810 & 0.804 & 0.761 & 0.781 & 0.778 \\
-\end{tabular}}
-
-\vspace{10pt}
-
-Baseline~correlation: \textbf{0.749}
-\vspace{10pt}
-%\caption{Correlation of the human judgment and BLEU computed with the data from WMT12}
-%\label{corrs12}
-%\end{center}
-%\end{table*}
-%
-%\begin{table*}[tb]
-%\begin{center}
-\scalebox{0.95}{
-\begin{tabular}{l|ccc|ccc}
-\multicolumn{7}{c}{\textbf{WMT13}}\\
-\hline
-\multirow{2}{*}{Method} & \multicolumn{3}{c|}{Greedy selection} & \multicolumn{3}{c}{Word alignment} \\
-& No Depfix & Full Depfix & Limited Depfix & No Depfix & Full Depfix & Limited Depfix\\
-\hline
-One-word only     & 0.861 & \textbf{0.887} & 0.883 & 0.856 & 0.877 & 0.872 \\
-One-word first    & 0.851 & 0.880 & 0.875 & 0.833 & 0.871 & 0.863 \\
-Multi-word first  & 0.838 & 0.870 & 0.864 & 0.833 & 0.868 & 0.861 \\
-\end{tabular}}
-
-\vspace{10pt}
-
-Baseline~correlation: \textbf{0.829}
-\caption{Correlation of the human judgment and BLEU using the simple substitution method.}
-\label{corrs13}
-\end{center}
-\end{table*}
  
-We use a freely available implementation\footurl{http://www.cnts.ua.ac.be/~vincent/scripts/rtest.py} of \newcite{meng:1992} to determine whether the difference in correlation
+We use a freely available implementation\footurl{http://www.cnts.ua.ac.be/~vincent/scripts/rtest.py} of \cite{meng:1992} to determine whether the difference in correlation
 coefficients is statistically significant. The test shows that BLEU performs
 better with our reference sentences with 99\% certainty. 
 
 Multi-word paraphrases are very noisy and while they do bring the system 
-outputs closer to the reference (the average BLEU score of the systems 
-increases), they often propose non-equivalent translations or violate the 
-correctness of the sentence, thus blurring the differences between systems.
+outputs closer to the reference (the average BLEU score is higher), they 
+often propose non-equivalent translations or violate the correctness of the 
+sentence, thus blurring the differences between systems.
 
 When paraphrasing is restricted by word alignment, all methods perform worse. 
-As Table \ref{replaced} shows, the number of applied paraphrases is much lower: 
+As Table \ref{lrec_replaced} shows, the number of applied paraphrases is much lower: 
 while the proportion of correct paraphrases is higher, their amount is reduced 
 too much and overall, our technique is harmed by this restriction. 
 
@@ -505,6 +555,7 @@ too much and overall, our technique is harmed by this restriction.
 \scalebox{0.85}{
 \begin{tabular}{l|cc|cc}
 \multicolumn{5}{c}{\textbf{WMT12}}\\
+\hline
 \multirow{2}{*}{Method} & \multicolumn{2}{c|}{Greedy selection} & \multicolumn{2}{c}{Word alignment} \\
 & Words & Phrases & Words & Phrases \\
 \hline
@@ -512,11 +563,13 @@ One-word only     & 1.59 & --   & 0.86 &  --  \\
 One-word first    & 1.59 & 0.23 & 0.86 & 0.22 \\
 Multi-word first  & 1.38 & 0.31 & 0.81 & 0.27 \\
 \end{tabular}}
+
 \vspace{10pt}
 
 \scalebox{0.85}{
 \begin{tabular}{l|cc|cc}
 \multicolumn{5}{c}{\textbf{WMT13}}\\
+\hline
 \multirow{2}{*}{Method} & \multicolumn{2}{c|}{Greedy selection} & \multicolumn{2}{c}{Word alignment} \\
 & Words & Phrases & Words & Phrases \\
 \hline
@@ -524,18 +577,16 @@ One-word only    & 1.33 &  --  & 0.76 & --   \\
 One-word first   & 1.33 & 0.20 & 0.76 & 0.20 \\
 Multi-word first & 1.04 & 0.68 & 0.74 & 0.24 \\
 \end{tabular}}
-\caption{Average number of replaced words/phrases.}
-\label{replaced}
+\caption{Average number of replaced words/phrases per sentence.}
+\label{lrec_replaced}
 \end{center}
 \end{table}
 
 On the other hand, applying Depfix is always beneficial, with the positive 
-effects ranging from 0.017 up to 0.042. This supports our assumption of the 
-importance of grammatical correctness of the created references. However, the 
-\textit{limited} version is not optimally chosen and performs worse than the 
-\textit{full} version in most cases.
+effects ranging from TODO up to TODO. This supports our assumption of the 
+importance of grammatical correctness of the created references.
 
-Results on the data from WMT13 and WMT12 are very similar. Again, paraphrasing 
+Results on the data from WMT13 and WMT12 are very similar -- paraphrasing 
 helps to increase the accuracy of the evaluation, even though the differences 
 on the WMT13 data are not as~big due to much higher baseline. This is also 
 reflected in~the smaller amount of substitutions.
