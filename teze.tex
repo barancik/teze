@@ -47,27 +47,27 @@
 
 \maketitle
 \begin{abstract}
-This thesis is concentrated on improving an accuracy of machine translation to 
-Czech language using targeted paraphrasing. We develop system that creates new
-synthetic reference that are closer in wording to a corresponding machine 
-translations. 
+This thesis is focused on improving an accuracy of machine translation to 
+Czech language using targeted paraphrasing. We develop and compare several 
+approaches for creating new synthetic references that are closer in wording to 
+a~corresponding machine translations. 
 
-Using these new reference sentences makes evaluation using traditional metrics 
-is more reliable as they lack of paraphrase and free word order support.
+These new reference sentences make evaluation using traditional metrics 
+more reliable as they lack of paraphrase and free word order support.
 
-We believe that after implementation, the system for generating new synthetic
-references will be very beneficial not only for MT evaluation, but mainly
-inside MT systems for improved tuning and development of the systems. This way,
-it will directly influence the quality of machine translation itself.
+After implementation, the system for generating new synthetic references will 
+be beneficial not only for MT evaluation, but mainly inside MT systems for 
+improved tuning and development of the systems. This way, it will directly 
+influence the quality of machine translation itself.
 
 %Trade-off between simplicity and quality of MT metric!!
 \end{abstract}
 
 \section{Introduction}
 Since the very first appearance of machine translation (MT) systems, a 
-necessity for their objective evaluation and comparison arose. The traditional
-human evaluation while being the most reliable has serious drawbacks -- it is 
-time-consuming and expensive.
+necessity for their objective evaluation and comparison has appeared. The 
+traditional human evaluation while being the most reliable has serious 
+drawbacks -- it is time-consuming and expensive.
 %, although there were recently successful attempts to overcome this problem 
 %using crowdsourcing techniques. [\markcite{{\it Callison-Burch}, 2009]} and 
 %[\markcite{{\it Bentivogli et al.}, 2011]} demonstrate that the average score of 
@@ -76,12 +76,9 @@ time-consuming and expensive.
 %(NLP) tasks including machine translation evaluation.
 
 However, the main problem of human evaluation is that it is highly dependent on 
-the person annotating and there is generally very low agreement between several 
-human annotators. %footnote - example, only blah blah correlation during \cite{wmt12}.
-Moreover, it is practically impossible to repeat the evaluation with the same
-results (TODO: nejaka citace??).
-%[Bojar - kniha] %nizka shoda pro cestinu?!! Ani ne kniha, ale spis wmt13, co 14?, 
-% kde to byla nejak hrozive nizka shoda..
+the person annotating and there is generally low inter-annotator agreement 
+\cite{wmt13}. Moreover, it is practically impossible to repeat the evaluation 
+with the same results \cite{bojar-kniha}.
 
 Due to being slow and unreproducible, it is impossible to use human evaluation
 for tuning and development of MT systems. Well-performing automatic MT 
@@ -96,38 +93,34 @@ evaluation metrics are essential precisely for these tasks.
 %common metric for MT evaluation, even though other, better-performing metrics 
 %exist. \cite{wmt14} 
 
-The first metric correlating well with human judgment was BLEU. \cite{bleu}
-BLEU is computed from an word sequences overlap between the translated sentence 
-(hypothesis) and one or more corresponding reference sentences, i.e., 
+TThe pioneer metrics correlating well with human judgment were BLEU \cite{bleu} 
+and NIST \cite{nist}. They are computed based on n-gram overlap between the 
+MT outpu (hypothesis) and one or more corresponding reference sentences, i.e., 
 translations made by a human translator.
 
-Due to its simplicity and language independence, BLEU still remains the most 
-common metric for MT evaluation and tuning, even though other, 
-better-performing metrics exist (\cite{wmt13-metrics}, \cite{wmt14}) and 
-\cite{callison2006re} shows its correlation with human judgment is not as high 
-as previously thought.
+Due to its simplicity and language independence, BLEU still remains de facto
+standard metric for MT evaluation and tuning, even though other, 
+better-performing metrics exist (\newcite{wmt13-metrics}, \newcite{wmt14}). 
+\newcite{callison2006re} shows that correlation of BLUE with human judgment is 
+not as high as previously thought.
 
 %Due to its simplicity and language independence, BLEU remains widely used, even 
 %though its correlation with human judgment is not as high as previously thought
 %(\cite{callison2006re},\cite{koehn-monz:2006:WMT}??). This is particular valid 
 %at a sentence level (Blatz et al. 2003).
 
-Furthermore, obtaining reference sentences is labour intensive and expensive.
-At the Linguistic Data Consortium, for example, production of reference 
-translation is complicated process involving translation by professional 
-agencies based on elaborate guidelines and detailed quality control. 
-\cite{strassel} 
+Furthermore, obtaining reference sentences is labour intensive and 
+expensive,\footnote{For example, production of reference translation  at~the 
+Linguistic Data Consortium is complicated process involving translation 
+by~professional agencies based on elaborate guidelines and detailed quality 
+control \cite{strassel}.} thus the standard practice is using only one 
+reference sentence and BLEU then tends to perform badly. 
 
-%For example, producing reference translation at the Linguistic Data Consortium, a common 
-%source of translated data for MT research, requires undertaking an elaborate process that involves translation agencies, detailed translation guidelines and quality control processes
-
-Therefore, the standard practice is using only one reference sentence and BLEU 
-then tends to perform badly. As there are many translations of a single 
-sentence, even a perfectly correct machine translation might get a low score 
-due different wording and disregarding synonymous expressions (see 
-\Fref{example_of_BLEU_malfunction}). This is especially valid for morphologically 
-rich languages with free word order like the Czech language. 
-\cite{bojar-tackling-sparse-data}
+As there are many translations of a single sentence, even a perfectly correct 
+hypothesis might get a low score due different wording and disregarding 
+synonymous expressions (see \Fref{example_of_BLEU_malfunction}). This is 
+especially valid for morphologically rich languages with free word order 
+like the Czech language. \cite{bojar-tackling-sparse-data}
 
 
 \begin{figure*}[tb]
@@ -146,9 +139,6 @@ rich languages with free word order like the Czech language.
   	Banks are testing payment by mobile phone \\
 	\end{tabular} \\
 
-% MT output & \textit{Banky zkou\v sej\'i platbu pomoc\'i mobiln\'iho telefonu} \\
-% 					 & Banks testing payment help mobile phone \\
-% 					 & Banks are testing payment by mobile telephone \\
  \hline
  Reference sentence & \begin{tabular}{llll}
  			\textit{Banky} & \textit{testuj\'i} & \textit{placen\'i} & \textit{mobilem} \\
@@ -166,61 +156,52 @@ to the BLEU score. There is only one unigram overlapping.}
 \label{example_of_BLEU_malfunction}
 \end{figure*}
 
-As the main task of an MT metric is essentially to decide whether the reference
-sentences is a paraphrase of the MT output, our goal is to achieve higher 
-accuracy of MT evaluation by targeted paraphrasing of reference sentences., i.e. 
-creating a new synthetic reference sentence that is still correct and keeps the 
-meaning of the original sentence, but at the same time it is closer in wording 
-to the MT output. BLEU and other string-based metrics should perform more 
-reliable using these new references. (TODO: nejak preformulovat)
+As the main task of an MT metric is essentially to decide whether a reference
+sentence is a paraphrase of a given hypothesis, our goal is to achieve higher 
+accuracy of MT evaluation by targeted paraphrasing of reference sentences., 
+i.e. creating a new synthetic reference sentence that is still correct and 
+keeps the meaning of the original sentence but at the same time it is closer in 
+wording to the MT output. BLEU and other string-based metrics performs more 
+reliable using these new references. %(TODO: nejak preformulovat)
 
-The structure of the paper is as follows: in the next section, we present other
-work in targeted paraphrasing for MT evaluation. In \Sref{Data}, we introduced
-the data we use for our experiments.  In sections \ref{lrec} and \ref{MT}, 
+The structure of the thesis is as follows: in the next section, we present 
+other work in paraphrasing for MT evaluation. In \Sref{Data}, we introduced
+the data we use for our experiments. In sections \ref{lrec} and \ref{MT}, 
 we show paraphrasing based on phrase substitutions and machine translation 
 itself. Finally, we conclude with avenues for further work.
 
 \section{Related Work}
 There are two attitudes towards solving the problem - one is to change the 
 automatic metric itself to be tolerant to other sentence representation and the
-other one is to pre-process automatically the reference sentence to new 
-synthetic reference that is closer in wording to the original reference 
-sentence and keeps its meaning and grammatical correctness.
+other one is to pre-process automatically the reference sentence via 
+paraphrasing.
 
 \subsection{Automatic Metrics}
-%Second generation metrics 
-Meteor \cite{meteor-wmt:2014}, TERp \cite{terp} and ParaEval \cite{paraeval2} 
-also largely focuses on a n-gram overlap while including other linguistically 
-motivated resources. They utilize paraphrase support using their own paraphrase 
-tables, which they all had acquired automatically using the pivot-based method. 
-\cite{pivoting} 
+Second generation metrics Meteor \cite{meteor-wmt:2014}, TERp \cite{terp} and 
+ParaEval \cite{paraeval2} still largely focus on a n-gram overlap while 
+including other linguistically motivated resources. They utilize paraphrase 
+support using their own paraphrase tables and show higher correlation with 
+human judgment than BLEU.
 
-%The Meteor metric outperforms traditional metrics as it explicitly addresses 
-%their weaknesses -- it does not only support match on several levels -  exact, 
-%stem, synonym, and paraphrase but it also takes into account recall, 
-%distinguishes between functional and content words, allows language-specific 
-%tuning of parameters and many others.
+Meteor is available for several languages including Czech. It explicitly 
+addresses weaknesses of BLEU -- it takes into account recall, distinguishes 
+between functional and content words, allows language-specific tuning of 
+parameters and many others. Its  basic setting of Meteor for evaluation 
+of~Czech sentences offers two levels of matches -- exact and paraphrase. As we 
+show further (see \Sref{parmesan}), its paraphrase tables are so noisy that 
+they actually harm the performance of the metric, as it can award mistranslated 
+and even untranslated words.
 
-Meteor paraphrase table are available not only for English, but for other five 
-languages, including the Czech language. The basic setting of Meteor for 
-evaluation of~Czech sentences offers two levels of matches -- exact and 
-paraphrase. As we show further (see \Sref{parmesan}), its paraphrase tables 
-are so noisy that they actually harm the performance of the metric, as it can
-award mistranslated and even untranslated words.
+String matching is hardly discriminative enough to reflect the human perception 
+and there is growing number of metrics that compute their score based on rich 
+linguistic features -- matching based on parse trees, POS tags or textual 
+entailment (e.g. \newcite{liu:2005}, \newcite{owczarzak:2007}, 
+\newcite{amigo:2009}, \newcite{Pado09}, \newcite{machacek:2011}). 
 
-There is growing belief in the MT community that surface level matching is not
-discriminative enough to reflect the translation quality of today’s MT systems %prefomulovat, vykradeno
-and employ rich linguistic features that better reflect human perception. (e.g.
- \newcite{liu:2005}, \newcite{owczarzak:2007}, \newcite{amigo:2009}, 
- \newcite{Popovic:2009}, \cite{Pado09},...) 
- 
-% \cite{Pado09} - as a translation should have the same meaning as the 
-%reference, Padó proposes metric based on textual entailment.
- 
 These metrics shows better correlation with human judgment, but their wide 
 usage is limited by being complex and language-dependent. As a result, there is
 a trade-off between linguistic-rich strategy for better performance and 
-applicability of simple string level matching.
+wide applicability of simple string level matching.
 
 %the development of automatic MT evaluation metrics falls into  a  dilemma of choosing 
 %the string level matching for wide application or selecting the linguistic-rich strategy
@@ -240,32 +221,32 @@ pairs of synonymous words, i.e. words appearing in the same WordNet
 evaluated. For every confirmed synonym, a new reference sentence is created by 
 placing it to the reference sentence on the position of its synonym.
 
-This solution is not quite possible to apply to the Czech language. As Czech 
-belongs among~inflective languages with rich morphology, a Czech word has 
+This solution is not directly applicable to the Czech language. As Czech 
+belongs to~inflective languages with rich morphology, a Czech word has 
 typically many forms and the correct form depends heavily on its context, 
-e.g., cases of nouns depend on verb valency frames. Changing a single word may 
-result into not grammatical sentence. Therefore, we do not attempt to~change 
-a~single word in~a~reference sentence but we focus on~creating one single 
-correct reference sentence.
+e.g., morphological cases of nouns depend on verb valency frames. Changing 
+a~single word may result into not grammatical sentence. Therefore, we do not 
+attempt to~change a~single word in~a~reference sentence but we focus 
+on~creating one single correct reference sentence.
 
 There is many other application for paraphrases in the MT field. Paraphrases 
-helps translate out-of-vocabulary words and increase quality of MT systems 
-trained on sparse data \cite{Callison-Burch:2006}, \cite{Marton:2009} or 
-enlarge training data. \cite{nakov2008improved}
+are utilized for translating out-of-vocabulary words and increase quality of MT 
+systems trained on sparse data \cite{Callison-Burch:2006}, \cite{Marton:2009} or 
+enlarge training data \cite{nakov2008improved}.
 \newcite{madnani2010circle} and \newcite{mehay2012shallow} show that single 
 translation augmented by targeted paraphrases can successfully replace up to
-additional 4 human reference translation.
+four additional human reference translation in the tuning phase of a MT system.
  
-%\xxx{Wubben}
+%\xxx{Wubben} 
 
 \section{Data}
 \label{Data}
 \subsection{Text Data}
 We perform our experiments on data sets from the English-to-Czech translation 
-task of WMT12 \cite{wmt12}, WMT13 \cite{wmt13} and WMT14 \cite{wmt14}. The data
-sets contain 13/14\footnote{We use only 12 of them because two of them 
-(FDA.2878 and online-G) have no human judgments.}/10 files with Czech outputs 
-of MT systems.
+task of WMT12 \cite{wmt12}, WMT13 \cite{wmt13}. The data sets contain 1
+3/14\footnote{We use only 12 of them because two of them 
+(FDA.2878 and online-G) have no human judgments.} files with Czech outputs 
+of different MT systems.
 
 In addition, each data set contains one file with corresponding reference 
 sentences and one with original English source sentences. We perform 
@@ -273,7 +254,7 @@ morphological analysis and tagging of the hypotheses and the reference
 sentences using Morče \cite{morce:2007}.
 
 The human judgment of hypotheses is available as a relative ranking of 
-performance of five systems for~a~sentence. We calculated the sbsolute 
+performance of five systems for~a~sentence. We calculated the absolute 
 performance of every system by the “$ > $ others” method \cite{bojar-grains}, 
 which was the WMT12 official system score. It is computed as 
 $ \frac{wins}{wins+loses} $, ties among several systems are ignored. We use 
@@ -285,9 +266,9 @@ this score as a human judgment in further evaluation.
 \subsection{Sources of Paraphrases}
 \label{meteori}
 We make use of two existing sources of Czech paraphrases -- the Czech WordNet 
-1.9 PDT \cite{czech-wordnet}, the Meteor Paraphrase Tables \cite{meteor-tables}. 
-Czech PPDB \cite{ppdb} became available only recently and we plan to use it in 
-further research.
+1.9 PDT \cite{czech-wordnet} and the Meteor Paraphrase Tables \cite{meteor-tables}. 
+%Czech PPDB \cite{ppdb} became available only recently and we plan to use it in 
+%further research.
 
 The \textbf{Czech WordNet 1.9 PDT} is derived from the WordNet \cite{wordnet} 
 by automatic translation followed by manual verification. It~contains rather 
@@ -297,27 +278,27 @@ our purposes - it contains only 13k pairs of synonymous lemmas. % and
 
 On~the other hand, Czech \textbf{Meteor Paraphrase tables} are quite the 
 opposite of Czech WordNet -- they are large in size, but contain a lot of 
-noise, as they were constructed automatically via \textit{pivoting}. 
-\cite{pivoting} The pivot method is an inexpensive way of acquiring paraphrases 
+noise, as they were constructed automatically via \textit{pivoting} 
+\cite{pivoting}. The pivot method is an inexpensive way of acquiring paraphrases 
 from large parallel corpora. It is based on the assumption that two phrases 
-that share a meaning may have a same translation in a foreign language. 
-\cite{dyvik}
+that share a meaning may have a same translation in a foreign language 
+\cite{dyvik}.
 
-The noise is particularly high among the multiword paraphrases -- for 
+The noise is particularly high among the multiword paraphrases -- for %TODO podle lopatkove the high for multiw...
 example: \textit{svého názoru} (its opinion) and \textit{šermovat rukama a 
 mlátit neviditelného} (to flail one's arms and to beat the invisible one) are 
-selected as a paraphrase. We show that the amount of noise in the multi-word 
-paraphrases is so high that no automatic filtering method we used outperforms 
+selected as a paraphrase. We experimented with several methods of reducing
+the noise in the multi-word paraphrases, however, none of them outperforms
 omitting them completely \cite{barancikova:2014}.
  
-Among one-word paraphrases the noise is sparser, but there are still pairs like 
-\textit{1873} - \textit{pijavice} (a leech) or \textit{afgh\'{a}nci} (Afghans) -
-\textit{š\v{t}astně} (happily) identified as synonyms. However, the biggest 
-problem is that most of synonymous pairs were just different word forms of the 
-same lemma. 
+Among one-word paraphrases the noise is sparser, but the paraphrase tables  %TODO podle lopatkove the high for multiw...
+still contains pairs such as \textit{pijavice} (a leech) - \textit{1873}
+or \textit{afgh\'{a}nci} (Afghans) - \textit{š\v{t}astně} (happily). 
+However, the biggest problem is that most of synonymous pairs were just 
+different word forms of the same lemma. 
 
-We performed automatically filtering among the one-word paraphrases in the 
-Meteor table in the following way. Using Morče, we first perform morphological 
+We perform automatic filtering among the one-word paraphrases in the 
+Meteor table in the following way. Using Morče, we first perform morphological  %TODO markete se nelibi: in the following way.
 analysis of all one-word pairs and replace the word forms with their lemmas. We 
 keep only pairs of different lemmas. Further, we dispose of pairs of words that 
 differ in their parts of speech (POS)\footnote{With a single exception -- 
@@ -328,8 +309,8 @@ speech \textit{C}, which is designated for numerals, \textit{18} is marked with
 ~contain an unknown (typically foreign) word.
 
 In this way we have reduced 684k paraphrases in~the original Czech Meteor 
-Paraphrase tables to~only 32k pairs of lemmas. We refer to~this table as
-~\textit{filtered Meteor}.
+Paraphrase tables to~only 32k pairs of lemmas. We refer to~this paraphrase
+table as~to~\textit{filtered Meteor}.
 
 \section{Simple substitution paraphrasing}
 \label{lrec}
@@ -960,7 +941,7 @@ nodes; t-nodes consist of a t-lemma and a set of attributes -- a \textit{formeme
 (essential morphological features).
 \end{itemize} 
 
-\subsection{Paraphrasing using Treex}
+\subsubsection{Treex}
 In TectoMT \cite{tectomt}, a sentence in a source language is analyses from 
 w-layer to t-layer, where is transferred to a second language t-layer and the 
 translation is generated to w-layer. 
@@ -1038,10 +1019,8 @@ necessary to ensure correct morphological agreement with surrounding words,
 such as adjectives and verbs).
 
 \subsubsection{Synthesis from t-layer to a-layer}
-The reordering block %A2A::ReorderByLemmas 
-is freely available at 
-GitHub.\footnote{The url is hidden due to anonymisation}
-%\footurl{https://github.com/ufal/treex/blob/master/lib/Treex/Block/A2A/ReorderByLemmas.pm}
+The reordering block A2A::ReorderByLemmas is freely available at 
+GitHub.\footurl{https://github.com/ufal/treex/blob/master/lib/Treex/Block/A2A/ReorderByLemmas.pm}
 
 The idea behind the block is to make the word order of the new reference as 
 similar to the word order of the translation, but with some tree-based 
@@ -1099,37 +1078,91 @@ Please note that each node can take part in at most two reorderings – once
 as the $H$ node and once as a $D_i$ node. Moreover, the nodes can be processed 
 in any order, as a reordering does not influence any other reordering.
 
+\subsubsection{Synthesis from a-layer to w-layer}
+The word forms are already generated on the a-layer, so there is little to be 
+done. Superfluous tokens are deleted (e.g. duplicated commas), prepositions are
+vocalized, the sentence beginning is capitalized, and the tokens are 
+concatenated (a set of rules is used to decide which tokens should be
+space-delimited and which should not).
+The example sentence (from \Fref{reordering}) results in the following sentence:
+\textit{Internet vyvolal boom těchto spekulací} (``The Internet has caused a boom 
+of these speculations.''), which has the same meaning as the original reference 
+sentence, is grammatically correst and most importantly is much more similar in
+wording to the hypothesis.
+
+%ref: Rozkvět těchto spekulací způsobil internet.
+%mt: Internet vyvolal boom v těchto spekulacích.
+%before reordering těchto spekulací vyvolal internet.
+%final: Internet vyvolal boom těchto spekulací.
+
 \subsubsection{Results}
 \begin{table*}[tb]
 \begin{center}
-\begin{tabular}{l|ccc}
-\multicolumn{4}{c}{\textbf{WMT12}}\\
-\hline
-reference & original & before reordering & new reference \\
-\hline
-BLEU & 0.751 & 0.783  & 0.804 \\
-Ex.Met & 0.848 & 0.900 & 0.903 \\
-%\hline
-\end{tabular} 
 
-\quad
 
-\begin{tabular}{l|ccc}
-\multicolumn{4}{c}{\textbf{WMT13}}\\
+\begin{tabular}{|c|ccc|ccc|}
 \hline
-reference & original & before reordering & new reference \\
+\multicolumn{1}{|l|}{} & \multicolumn{3}{c|}{\textbf{WMT12}}   & \multicolumn{3}{c|}{\textbf{WMT13}}  \\ 
 \hline
-BLEU & 0.834 &  0.873 & 0.878 \\
-Ex.Met & 0.848 & 0.893 &  0.893\\
-%\hline
+references             & original & paraphrased & reordered & original & paraphrased & paraphrased \\ 
+\hline
+BLEU                   & 0.751    & 0.783       & 0.804     & 0.834    & 0.850       & 0.878   \\  %0.852  
+Meteor                 & 0.833    & 0.864       & 0.870     & 0.817    & 0.871       & 0.870   \\  %O.871
+Ex.Meteor              & 0.861    & 0.900  & \textbf{0.904} & 0.848  & \textbf{0.893} & \textbf{0.893}\\  %0.891
+\hline
 \end{tabular}
-
-\caption{Pearson's correlation of Meteor and the human judgment.}
-\label{treex_results:12:13}
+\caption{Pearson correlation of a metric and human judgment on original 
+references, paraphrased references and paraphrased reordered references. 
+Ex.Meteor represents Meteor metric with exact match only (i.e. no paraphrase
+support).}
+\label{results:treex}
 \end{center}
 \end{table*}
 
-Example of the method, see \Fref{example:Treex}, TODO: nejake ilustracni stromy, result see \Tref{treex_results:12:13}
+Our method of paraphrasing is independent of an evaluation metric used. We 
+employ three different metrics - BLEU score, Meteor metric and Meteor metric 
+without the paraphrase support (as it seem redundant to use paraphrases on 
+already paraphrased sentences). 
+%TODO asi by to chtelo zaradit vic metrik, kdyz se tim tak chlubim
+% idealne nejakou tu "hlubokou", napr. semPOS
+
+The results are presented in \Tref{results:treex} as a Pearson correlation of a 
+metric with human judgment. Paraphrasing clearly helps to reflect the human 
+perception better. Even the Meteor metric that already contains paraphrases
+is performing better using paraphrased references created using its own 
+paraphrase table. This is again due to the noise in the paraphrase table, which
+blurs the difference between the hypotheses of different MT systems.
+
+The reordering clearly helps when we evaluate via the BLEU metric, which 
+punishes any word order changes to the reference sentence. Meteor is more
+tolerant to word order changes and the reordering has practically no effect 
+on his scores.
+
+However, manual examination showed that our constraints are not strong enough 
+to prevent creating non grammatical sentences. The algorithm tend to copy the
+word order of the hypothesis, even if it is not correct. Most errors were caused
+by changes of a word order of punctuation. 
+
+TODO: There is also problems with some not commonly used phrases in the languages the synthesis
+can not deal with very well.
+
+Jen si vzpomeňte, kolikrát jste už tomu svému řekla, ať na vás raději počká před vchodem...
+Jen nezapomenu, jak jste mnoho časů říkali své druhé polovině, čekají na vás...
+Jen vzpomeňte, kolikrát jste už tomu říkaly svých, ať čeká před vchodem na vás rád.
+Jen si vzpomeňte , kolikrát jste už tomu svému říkali , ať na vás raději čekají před vchodem ...
+
+This algorithm also do not outperform 
+
+
+
+
+%16:17 sol2 paraphrasing$cat wmt12.prumer | prumer
+%4180.08
+%16:17 sol2 paraphrasing$cat wmt13.prumer | prumer
+%3548.67
+%16:18 sol2 paraphrasing$cat wmt14.prumer | prumer
+%3787.2
+
 
 \section{Future Work}
 We would like to work to enhance Treex paraphrases, next step could be multiword 
