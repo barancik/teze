@@ -315,9 +315,16 @@ table as~to~\textit{filtered Meteor}.
 \section{Simple substitution paraphrasing}
 \label{lrec}
 We experiment with several algorithms for paraphrasing reference sentences. 
-This method is widely based on \newcite{kauchak}. Our algorithm differ extends it 
-with several methods for selecting potential paraphrase pairs and in the choice 
-of paraphrases.
+The method in this section is widely based on \newcite{kauchak}. We start with 
+a basic algorithm for phrase substitution from a hypothesis to a reference. 
+
+We experiment with different phrase lengths and two methods for phrase 
+selection -- simple greedy one and word/phrase alignments.
+
+The newly created reference may be non grammatical because of the direct
+substitutions from the hypothesis, thus we employ Depfix \cite{depfix}, 
+a~system for automatic correction of~grammatical errors that appear often 
+in~English-to-Czech MT outputs. 
 
 \subsection{Candidate Selection}
 We select potential paraphrases using two different methods. The first one is a 
