@@ -64,10 +64,15 @@ influence the quality of machine translation itself.
 \end{abstract}
 
 \section{Introduction}
-Since the very first appearance of machine translation (MT) systems, a 
-necessity for their objective evaluation and comparison has appeared. The 
-traditional human evaluation while being the most reliable has serious 
-drawbacks -- it is time-consuming and expensive.
+The need for quality automatic machine translation (MT) evaluation is as old as
+the machine translation itself. It is essential for objective evaluation during
+development of a MT system as well as comparison of different MT systems.
+
+The traditional human evaluation while being the most reliable has serious 
+drawbacks. Not only it is time-consuming and expensive, but more importantly
+it is highly dependent on the person annotating and the inter-annotator 
+agreement is generally low  \cite{wmt13}. Moreover, it is practically 
+impossible to repeat the evaluation with the same results \cite{bojar-kniha}.
 %, although there were recently successful attempts to overcome this problem 
 %using crowdsourcing techniques. [\markcite{{\it Callison-Burch}, 2009]} and 
 %[\markcite{{\it Bentivogli et al.}, 2011]} demonstrate that the average score of 
@@ -75,39 +80,22 @@ drawbacks -- it is time-consuming and expensive.
 %standards provided by expert annotators in various natural language processing 
 %(NLP) tasks including machine translation evaluation.
 
-However, the main problem of human evaluation is that it is highly dependent on 
-the person annotating and there is generally low inter-annotator agreement 
-\cite{wmt13}. Moreover, it is practically impossible to repeat the evaluation 
-with the same results \cite{bojar-kniha}.
-
 Due to being slow and unreproducible, it is impossible to use human evaluation
 for tuning and development of MT systems. Well-performing automatic MT 
-evaluation metrics are essential precisely for these tasks.
+evaluation metrics are essential precisely for these tasks. The pioneer metrics 
+correlating well with human judgment were BLEU \cite{bleu} and NIST \cite{nist}. 
+They are computed based on n-gram overlap between the MT output (hypothesis) and 
+one or more corresponding reference sentences, i.e., translations made by a human 
+translator.
 
-%Pioneer measures such as BLEU and NIST measure MT quality cheaply and objectively
-%through the strong correlation between human judgement and the n-gram overlap
-%betweeen  aa system translation and one or more reference translation. 
-
-%The first metric correlating well with human judgment was BLEU \cite{bleu}.
-%Due to its simplicity and language-independence, it still remains the most 
-%common metric for MT evaluation, even though other, better-performing metrics 
-%exist. \cite{wmt14} 
-
-TThe pioneer metrics correlating well with human judgment were BLEU \cite{bleu} 
-and NIST \cite{nist}. They are computed based on n-gram overlap between the 
-MT outpu (hypothesis) and one or more corresponding reference sentences, i.e., 
-translations made by a human translator.
-
-Due to its simplicity and language independence, BLEU still remains de facto
-standard metric for MT evaluation and tuning, even though other, 
-better-performing metrics exist (\newcite{wmt13-metrics}, \newcite{wmt14}). 
-\newcite{callison2006re} shows that correlation of BLUE with human judgment is 
-not as high as previously thought.
-
-%Due to its simplicity and language independence, BLEU remains widely used, even 
-%though its correlation with human judgment is not as high as previously thought
-%(\cite{callison2006re},\cite{koehn-monz:2006:WMT}??). This is particular valid 
-%at a sentence level (Blatz et al. 2003).
+Despite its age, BLEU still remains de facto standard metric for MT evaluation 
+and tuning because of its simplicity and language independence, even though 
+other, better-performing metrics exist (\newcite{wmt13-metrics}, 
+\newcite{wmt14}). \todo{pridat novejsi clanky} \newcite{callison2006re} shows that 
+correlation of BLUE with human judgment is not as high as previously thought.
+% This is particular valid at a sentence level (Blatz et al. 2003).
+%Post:  BLEU’s relative language indepen- dence, its ease of computation, and its reason- able correlation with human judgments have led to its adoption as the dominant metric for ma- chine translation research. 
+%Post: This is of course not to claim there are no problems with BLEU. Its weaknesses abound, and much has been written about them (cf.  \cite{callison2006re}; \cite{reiter-2018-structured}). 
 
 Furthermore, obtaining reference sentences is labour intensive and 
 expensive,\footnote{For example, production of reference translation  at~the 
@@ -122,6 +110,10 @@ synonymous expressions (see \Fref{example_of_BLEU_malfunction}). This is
 especially valid for morphologically rich languages with free word order 
 like the Czech language. \cite{bojar-tackling-sparse-data}
 
+%Russo-Lassner
+%While human evaluation of machine translation (MT) output remains the most reliable method to assess translation quality, it is a costly and time consuming process. The development of automatic MT evaluation metrics enables the rapid assessment of system output. By providing immediate feedback on the effectiveness of various techniques, these metrics have guided machine translation research and have facilitated rapid advances in the state of the art. In addition, automatic evaluation metrics are useful in comparing the performance of multiple MT systems on a given translation task, as demonstrated by the DARPA TIDES research program. Since automatic evaluation metrics are meant to serve as a surrogate for human judgments, their quality is determined by how well they correlate with assessors’ preferences and how accurately they predicts human judgments.
+%Although current methods for automatically evaluating MT output do not require humans to assess individual system output, humans are nevertheless needed to generate a number of “reference translations”. The quality of machine-generated translations is determined by automatically comparing system output against these references. Despite numerous variations, which we will discuss in the next section, all current automatic evaluation metrics are based on the simple idea of matching substrings (i.e., n-grams) from machine output with substrings from the reference translations. This substring matching approach has obvious drawbacks: it does not account for combinations of lexical and syntactic differences that might occur between a perfectly fluent and accurately-translated machine output and a human reference translation (beyond variations already captured by the different reference translations themselves). Moreover, the set of human reference translations is unlikely to be an exhaustive inventory of “good translations” for any given foreign language sentence. Therefore, it would be highly desirable to have an MT evaluation metric capable of automatically determining equivalences in meaning without relying on exact substring matches.
+%We propose a novel approach to automatic machine translation evaluation based on paraphrase identification. The quality of machine-generated output can be viewed as the extent to which the conveyed meaning matches the semantics of the reference translations, independent of substrings they may share. In short, all paraphrases of human-generated references should be considered “good” translations. We have implemented this idea in a statistical model of human preferences that combines features from existing automatic evaluation metrics with features that have proven to be useful in the paraphrase identification task. Results show that exploiting paraphrase identification techniques results in a statistically significant improvement in correlation with human judgments at the sentence level, measured against baselines that use only existing automatic metrics.
 
 \begin{figure*}[tb]
 \begin{center}
@@ -171,6 +163,56 @@ we show paraphrasing based on phrase substitutions and machine translation
 itself. Finally, we conclude with avenues for further work.
 
 \section{Related Work}
+----
+
+https://github.com/awslabs/sockeye/ tree/master/contrib/sacrebleu
+pip3 install sacrebleu
+
+The situation is even worsened by the fact, that the BLEU score is reported inconsistenly. \cite{post-2018-call} point out that the 
+
+ Although people refer to “the” BLEU score, BLEU is in fact a param- eterized metric whose values can vary wildly with changes to these parameters. These pa- rameters are often not reported or are hard to find, and consequently, BLEU scores be- tween papers cannot be directly compared. I quantify this variation, finding differences as high as 1.8 between commonly used configu- rations. The main culprit is different tokeniza- tion and normalization schemes applied to the reference. Pointing to the success of the pars- ing community, I suggest machine translation researchers settle upon the BLEU scheme used by the annual Conference on Machine Trans- lation (WMT), which does not allow for user- supplied reference processing, and provide a new tool, SACREBLEU,1 to facilitate this.
+ 
+ Bleu is ot a single metric, it requires a number of parameters, these include the number of references used (and the computation of the length penalty if more references used), the maximum n-gram length, smoothing applied to 0-counts n-grams. But basically most of these are moot - most often there is only one reference, maximum n-gram length is virtually always four and since BLEU is corpus level, it is rare that there are any zero counts - i.e. more theoretical problem.
+ 
+ 
+ It's largely affected by preprocessing (normalization, tokenizatin,...). BLEU scores are often reported as being tokenized or detokenized. But for comput- ing BLEU, both the system output and reference are always tokenized; what this distinction refers to is whether the reference preprocessing is user- supplied or metric-internal (i.e., handled by the code implementing the metric), respectively. And since BLEU scores can only be compared when the reference processing is the same, user-supplied preprocessing is error-prone and inadequate for comparing across papers.
+ 
+ Difference up to 1.5 BLEU points based on different preprocessing.
+ 
+ 
+ Scores computed against differenty-processed references are not comparable. Papers vary in the hidden parameters and schemes they use, yet often do not report them.
+ 
+ He introduces a Python package SacreBLEU, which automatically downloads and stores references for common test sets and thus introducing a "protective layer" between them and the user. It also provides a number of other featueres such as reporting a version string which records the parameters used and which can be included in published papers
+
+----
+\cite{reiter-2018-structured} shows:
+- for MT is text-level correlation poor, but reasonably well for system level
+- that correlation of BLEU with ranking based on human assesment differs very much during many years of WMT(07 to 16) evaluation (e.g. EN-DE Spearman: 0.26 (07), 0.58 (08), -0.43(09), 0.39(10), ..), it is very much depnedent on the detauks if the details of the evaluation (corpora, human ranking assesment).
+- BLEU was originally proposed for diagnostic evaluation of MT systems, that is, as a technique for allowing researchers and developers to quckly "weed out bad ideas from good ideas" (\cite{bleu}, page 311). I thing the surveyed papers support this use of BLE, since most of the system-level BLEU-human correlationns for MT reported Medium or High.
+- there is a wide range of correlation of BLEU and human judgment even in very similar tasks, this suggests the correlation is dependent on contextual factors
+- BLEU has technological biases that we do not understand. This is especially worrying as new technologies such as neural networks becme more prominent, we do not know if BLEU is "fair" to such technologies. 
+
+https://pdfs.semanticscholar.org/301c/621fba608afa5c04ac149eb16c6a6e621289.pdf
+
+\cite{callison2006re} 
+
+
+\cite{wmt16} n Figure 3–5, we plotted the human evaluation result against everybody’s favorite metric BLEU. Although these two metrics correlate generally well, the plots clearly suggest that a fair comparison of systems of different kinds cannot rely on automatic scores. Rule-based systems receive a much lower BLEU score than statistical systems (see for instance English–German, e.g., PROMT-RULE). The same is true to a lesser degree for statistical syntax-based systems (see English– German, UEDIN-SYNTAX vs. UEDIN-PBMT).
+
+https://pdfs.semanticscholar.org/7d45/d353baf9c3b49963886c37af8d735a624ec1.pdf?_ga=2.167828257.1279602481.1565166754-1247173902.1546618752
+
+
+https://arxiv.org/pdf/1905.12752.pdf
+\cite{roy2019}
+
+https://www.aclweb.org/anthology/N16-3013
+\cite{napoles-etal-2016-sentential}
+https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=65142863 - vyzkouset
+
+https://arxiv.org/pdf/1901.03644.pdf
+https://arxiv.org/pdf/1804.06059.pdf
+https://www.aclweb.org/anthology/N16-3013
+
 There are two attitudes towards solving the problem - one is to change the 
 automatic metric itself to be tolerant to other sentence representation and the
 other one is to pre-process automatically the reference sentence via 
@@ -182,6 +224,7 @@ ParaEval \cite{paraeval2} still largely focus on a n-gram overlap while
 including other linguistically motivated resources. They utilize paraphrase 
 support using their own paraphrase tables and show higher correlation with 
 human judgment than BLEU.
+
 
 Meteor is available for several languages including Czech. It explicitly 
 addresses weaknesses of BLEU -- it takes into account recall, distinguishes 

@@ -428,6 +428,21 @@ location="Ann Arbor, Michigan",
   year={2008},
 }
 
+@inproceedings{napoles-etal-2016-sentential,
+	title = "Sentential Paraphrasing as Black-Box Machine Translation",
+	author = "Napoles, Courtney  and
+	Callison-Burch, Chris  and
+	Post, Matt",
+	booktitle = "Proceedings of the 2016 Conference of the North {A}merican Chapter of the Association for Computational Linguistics: Demonstrations",
+	month = jun,
+	year = "2016",
+	address = "San Diego, California",
+	publisher = "Association for Computational Linguistics",
+	url = "https://www.aclweb.org/anthology/N16-3013",
+	doi = "10.18653/v1/N16-3013",
+	pages = "62--66",
+}
+
 @inproceedings{Novak:2007,
   author = {Novák, Václav and \v{Z}abokrtský, Zden\v{e}k},
   booktitle = {TSD},
@@ -539,6 +554,20 @@ address = {Prague, Czech republic},
  address = {Stroudsburg, PA, USA},
 } 
 
+@inproceedings{post-2018-call,
+	title = "A Call for Clarity in Reporting {BLEU} Scores",
+	author = "Post, Matt",
+	booktitle = "Proceedings of the Third Conference on Machine Translation: Research Papers",
+	month = oct,
+	year = "2018",
+	address = "Belgium, Brussels",
+	publisher = "Association for Computational Linguistics",
+	url = "https://www.aclweb.org/anthology/W18-6319",
+	doi = "10.18653/v1/W18-6319",
+	pages = "186--191",
+	abstract = "The field of machine translation faces an under-recognized problem because of inconsistency in the reporting of scores from its dominant metric. Although people refer to {``}the{''} BLEU score, BLEU is in fact a parameterized metric whose values can vary wildly with changes to these parameters. These parameters are often not reported or are hard to find, and consequently, BLEU scores between papers cannot be directly compared. I quantify this variation, finding differences as high as 1.8 between commonly used configurations. The main culprit is different tokenization and normalization schemes applied to the reference. Pointing to the success of the parsing community, I suggest machine translation researchers settle upon the BLEU scheme used by the annual Conference on Machine Translation (WMT), which does not allow for user-supplied reference processing, and provide a new tool, SACREBLEU, to facilitate this.",
+}
+
 @InProceedings{ppdb,
   author = {Juri Ganitkevitch and Chris Callison-Burch},
   title = {The Multilingual Paraphrase Database},
@@ -546,7 +575,35 @@ address = {Prague, Czech republic},
   year = {2014},
   month = {may},
   date = {26-31},
+}
+
+@article{reiter-2018-structured,
+	title = "A Structured Review of the Validity of {BLEU}",
+	author = "Reiter, Ehud",
+	journal = "Computational Linguistics",
+	volume = "44",
+	number = "3",
+	month = sep,
+	year = "2018",
+	url = "https://www.aclweb.org/anthology/J18-3002",
+	doi = "10.1162/coli_a_00322",
+	pages = "393--401",
+	abstract = "The BLEU metric has been widely used in NLP for over 15 years to evaluate NLP systems, especially in machine translation and natural language generation. I present a structured review of the evidence on whether BLEU is a valid evaluation technique{---}in other words, whether BLEU scores correlate with real-world utility and user-satisfaction of NLP systems; this review covers 284 correlations reported in 34 papers. Overall, the evidence supports using BLEU for diagnostic evaluation of MT systems (which is what it was originally proposed for), but does not support using BLEU outside of MT, for evaluation of individual texts, or for scientific hypothesis testing.",
 } 
+
+@article{roy2019,
+	author    = {Aurko Roy and	David Grangier},
+	title     = {Unsupervised Paraphrasing without Translation},
+	journal   = {CoRR},
+	volume    = {abs/1905.12752},
+	year      = {2019},
+	url       = {http://arxiv.org/abs/1905.12752},
+	archivePrefix = {arXiv},
+	eprint    = {1905.12752},
+	timestamp = {Mon, 03 Jun 2019 13:42:33 +0200},
+	biburl    = {https://dblp.org/rec/bib/journals/corr/abs-1905-12752},
+	bibsource = {dblp computer science bibliography, https://dblp.org}
+}
 
 @inproceedings{srilm,
     author = {Andreas Stolcke},
@@ -716,6 +773,18 @@ address = {Prague, Czech republic},
   year      = {2014},
   address   = {Baltimore, USA},
   publisher = {Association for Computational Linguistics},
+}
+
+@InProceedings{wmt16,
+	author    = {Bojar, Ond\v{r}ej  and  Chatterjee, Rajen  and  Federmann, Christian  and  Graham, Yvette  and  Haddow, Barry  and  Huck, Matthias  and  Jimeno Yepes, Antonio  and  Koehn, Philipp  and  Logacheva, Varvara  and  Monz, Christof  and  Negri, Matteo  and  Neveol, Aurelie  and  Neves, Mariana  and  Popel, Martin  and  Post, Matt  and  Rubino, Raphael  and  Scarton, Carolina  and  Specia, Lucia  and  Turchi, Marco  and  Verspoor, Karin  and  Zampieri, Marcos},
+	title     = {Findings of the 2016 Conference on Machine Translation},
+	booktitle = {Proceedings of the First Conference on Machine Translation},
+	month     = {August},
+	year      = {2016},
+	address   = {Berlin, Germany},
+	publisher = {Association for Computational Linguistics},
+	pages     = {131--198},
+	url       = {http://www.aclweb.org/anthology/W/W16/W16-2301}
 }
 
 @inproceedings{nist,
